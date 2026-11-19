@@ -2684,6 +2684,9 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 .preset-card .pc-sum{font-size:11.5px;color:#a79a90;margin-top:3px;line-height:1.4;}
 .preset-card .pc-btns{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
 .preset-card .pc-btns button{flex:1 1 auto;min-width:64px;}
+.motion-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+.motion-quick button{padding:8px 4px;}
+.motion-quick button.active{border-color:#ff9a3c;color:#ffb067;background:#2a1a10;}
 .preset-groups{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;}
 @media (max-width: 900px){
   .lbl-long{display:none;} .lbl-short{display:inline;}
@@ -2699,7 +2702,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.0</span></div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.1</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3356,6 +3359,8 @@ const state = {
     heightScale: 1.4,
     fallSpeed: 0.07,
     columnSpeed: 1.0,
+    motionSmooth: 60, motionUp: 1, motionDown: 1, motionGate: 15,
+    circleOnVinyl: false, circleCenter: 'image', circleSpin: 6,
     peakSpeed: 0.07,
     frequencyMap: 'left_bass_right_treble',
     color: '#38bdf8',
@@ -3474,7 +3479,20 @@ const AVEE_WAVE_STYLES = [
   {id:'wire_pulse_arc', name:'〰️ 71. Pulse Arc — dây cong theo năng lượng nhạc'},
   {id:'wire_glass_echo', name:'〰️ 72. Glass Echo — dây kính + bóng vọng mờ'},
   {id:'wire_infinity_loop', name:'〰️ 73. Infinity Loop — đôi dây giao thoa nhẹ'},
-  {id:'wire_spectrum_thread', name:'〰️ 74. Spectrum Thread — dây phổ tần chuyển sắc'}
+  {id:'wire_spectrum_thread', name:'〰️ 74. Spectrum Thread — dây phổ tần chuyển sắc'},
+  {id:'circle_radial_bars', pro:true, name:'⭕ 76. Vòng cột tỏa ra — phổ tròn kinh điển'},
+  {id:'circle_trap_nation', pro:true, name:'⭕ 77. Trap Nation — nhiều lớp màu rung theo bass'},
+  {id:'circle_mirror', pro:true, name:'⭕ 78. Vòng đối xứng — cột trong & ngoài'},
+  {id:'circle_dots', pro:true, name:'⭕ 79. Vòng chấm sáng'},
+  {id:'circle_light_rays', pro:true, name:'⭕ 80. Vòng tia sáng + hạt (hợp Ballad)'},
+  {id:'circle_neon_lightning', pro:true, name:'⭕ 81. Vòng neon tia điện (hợp EDM)'},
+  {id:'circle_liquid_blob', pro:true, name:'⭕ 82. Vòng sóng mềm như chất lỏng (hợp Lofi)'},
+  {id:'circle_hud', pro:true, name:'⭕ 83. Vòng HUD — vòng tiến trình + đồng hồ'},
+  {id:'bass_pulse_circle', pro:true, name:'💥 84. Nhịp bass — khối tròn + gợn sóng'},
+  {id:'sym_center_bars', pro:true, name:'📊 85. Cột đối xứng trên dưới'},
+  {id:'smooth_line_wave', pro:true, name:'〰️ 86. Đường sóng mượt + phản chiếu'},
+  {id:'particles_dance', pro:true, name:'✨ 87. Hạt nhảy múa theo nhạc'},
+  {id:'terrain_3d', pro:true, name:'🏔️ 88. Địa hình sóng 3D (Joy Division)'}
 ];
 
 const TOTAL_PEAK_BARS = 128;
@@ -3871,7 +3889,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.0 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.1 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -4750,14 +4768,35 @@ function panelWave(){
   const Wv = state.wave;
   const wrap = el(`<div>
     <h3>Sóng nhạc (Avee Visualizer Pro)</h3>
-    <p class="hint">75 kiểu sóng chuyên nghiệp — Ballad & EDM, gồm nhiều phong cách luxury. Tùy chỉnh vị trí kéo sát mép hoặc kéo sâu xuống dưới viền.</p>
+    <p class="hint">88 kiểu sóng chuyên nghiệp (có 9 kiểu tròn) — Ballad & EDM, gồm nhiều phong cách luxury. Tùy chỉnh vị trí kéo sát mép hoặc kéo sâu xuống dưới viền.</p>
     <div class="checkline"><input type="checkbox" id="wEnabled" ${Wv.enabled?'checked':''}> Bật sóng nhạc</div>
     
     <div class="field">
       <label>Mẫu sóng Avee Pro</label>
       <select id="wStyleSelect">
-        ${AVEE_WAVE_STYLES.map(w=>`<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${w.name}</option>`).join('')}
+        <optgroup label="★ MỚI — Sóng tròn & kiểu hot">${AVEE_WAVE_STYLES.filter(w=>w.pro).map(w=>`<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${w.name}</option>`).join('')}</optgroup>
+        <optgroup label="Kiểu cổ điển (1–75)">${AVEE_WAVE_STYLES.filter(w=>!w.pro).map(w=>`<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${w.name}</option>`).join('')}</optgroup>
       </select>
+    </div>
+
+    <div class="batch-box" id="wMotionBox">
+      <div class="title">◈ Chuyển động sóng</div>
+      <div class="motion-quick"><button class="btn-sm" data-mq="veryslow">Rất êm</button><button class="btn-sm" data-mq="slow">Êm</button><button class="btn-sm" data-mq="mid">Vừa</button><button class="btn-sm" data-mq="fast">Nhanh</button></div>
+      <div class="field"><label>Độ êm <span class="rangeval" id="wMsVal"></span></label><input type="range" id="wMs" min="0" max="100" step="1"></div>
+      <div class="row2">
+        <div class="field"><label>Tốc độ lên <span class="rangeval" id="wMuVal"></span></label><input type="range" id="wMu" min="0.25" max="3" step="0.05"></div>
+        <div class="field"><label>Tốc độ xuống <span class="rangeval" id="wMdVal"></span></label><input type="range" id="wMd" min="0.25" max="3" step="0.05"></div>
+      </div>
+      <div class="field"><label>Bỏ rung lặt vặt <span class="rangeval" id="wMgVal"></span></label><input type="range" id="wMg" min="0" max="100" step="1"></div>
+      <p class="hint" style="margin:4px 0 0;">Mẹo: lên nhanh + xuống chậm = vẫn bắt đúng nhịp mà trông êm. Áp dụng cho mọi kiểu sóng, giống nhau lúc xem trước và trong video.</p>
+    </div>
+
+    <div class="batch-box" id="wCircleBox" style="display:none;">
+      <div class="title">◈ Sóng tròn</div>
+      <label class="checkline"><input type="checkbox" id="wCircVinyl"> Bao quanh đĩa than</label>
+      <div class="field"><label>Ở giữa vòng</label><select id="wCircCenter"><option value="image">Ảnh (ảnh đĩa than nếu có, không thì ảnh đang chiếu)</option><option value="glow">Vầng sáng</option><option value="none">Để trống</option></select></div>
+      <div class="field"><label>Tốc độ xoay <span class="rangeval" id="wCircSpinVal"></span></label><input type="range" id="wCircSpin" min="-40" max="40" step="1"></div>
+      <p class="hint" style="margin:4px 0 0;">Vị trí ngang/dọc = tâm vòng (kéo trực tiếp trên khung hình cũng được) • Độ rộng sóng = cỡ vòng • Độ nảy Bass = độ vươn của sóng.</p>
     </div>
 
     <div class="batch-box" id="wLayoutBox">
@@ -4853,7 +4892,16 @@ function panelWave(){
 
   wrap.querySelector('#wEnabled').addEventListener('change', e=>{ Wv.enabled=e.target.checked; renderFrame(getCurTime()); });
   const waveStyleSelect = wrap.querySelector('#wStyleSelect');
-  waveStyleSelect.addEventListener('change', e=>{ Wv.style=e.target.value; renderFrame(getCurTime()); });
+  waveStyleSelect.addEventListener('change', e=>{
+    const wasCirc=PRO_CIRCLE_STYLES.has(Wv.style);
+    Wv.style=e.target.value;
+    const isCirc=PRO_CIRCLE_STYLES.has(Wv.style);
+    if(isCirc && !wasCirc && !Wv.circleOnVinyl && (Number(Wv.y)>72 || Number(Wv.y)<28)){ Wv.x=50; Wv.y=50; lumiToast('Đã đưa sóng tròn vào giữa khung — kéo để dời vị trí'); }
+    if(!isCirc && wasCirc && Math.abs(Number(Wv.y)-50)<0.01){ Wv.y=(Wv.style==='sym_center_bars'||Wv.style==='particles_dance')?78:92; }
+    if((Wv.style==='terrain_3d') && Number(Wv.y)<60){ Wv.y=88; }
+    renderPanel(); renderFrame(getCurTime());
+  });
+  bindWaveMotion(wrap);
   // Wave style wheel: one mouse-wheel notch = exactly one effect step.
   // Works while merely hovering the select; no click/focus required.
   waveStyleSelect.addEventListener('wheel', e=>{
@@ -5481,6 +5529,391 @@ function analyserLikeSpectrum(t, rawData){
   for(let i=lim;i<rawData.length;i++) rawData[i]=0;
 }
 
+
+/* =========================================================================
+   LUMI 4.1 — CHUYỂN ĐỘNG SÓNG (độ êm / lên / xuống / bỏ rung)
+   Áp lên dữ liệu phổ trước khi vẽ → tác dụng cho mọi kiểu sóng,
+   tính theo thời gian bài hát → xem trước và video giống nhau.
+========================================================================= */
+const WAVE_MOTION_PRESETS={
+  veryslow:{motionSmooth:85,motionUp:0.9,motionDown:0.55,motionGate:28},
+  slow:{motionSmooth:60,motionUp:1,motionDown:1,motionGate:15},
+  mid:{motionSmooth:30,motionUp:1.2,motionDown:1.2,motionGate:6},
+  fast:{motionSmooth:0,motionUp:1,motionDown:1,motionGate:0}
+};
+const waveMotionState={env:new Float32Array(256),out:new Uint8Array(256),lastT:-1,fresh:true};
+function applyWaveMotion(raw,t){
+  const Wv=state.wave, M=waveMotionState;
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const smooth=cl(Number(Wv.motionSmooth??60),0,100)/100;
+  const up=cl(Number(Wv.motionUp??1),0.25,3), down=cl(Number(Wv.motionDown??1),0.25,3);
+  const gate=cl(Number(Wv.motionGate??15),0,100)/100;
+  if(smooth<=0.001 && gate<=0.001){ M.fresh=true; M.lastT=-1; return; }
+  if(t===M.lastT && !M.fresh){ raw.set(M.out.subarray(0,raw.length)); return; }
+  const dt=M.lastT<0?0:t-M.lastT;
+  const reset=M.fresh || M.lastT<0 || dt<0 || dt>0.6;
+  const atk=(0.012+0.10*Math.pow(smooth,1.5))/up;
+  const rel=(0.025+0.85*Math.pow(smooth,1.4))/down;
+  const dead=gate*22, floor=gate*28;
+  const ka=dt>0?1-Math.exp(-dt/atk):0, kr=dt>0?1-Math.exp(-dt/rel):0, kd=dt>0?1-Math.exp(-dt/(rel*3)):0;
+  const n=Math.min(raw.length,256), env=M.env, out=M.out;
+  for(let k=0;k<n;k++){
+    let target=raw[k];
+    target=target<=floor?0:(target-floor)*255/(255-floor);
+    if(reset){ env[k]=target; }
+    else if(dt>0){
+      const diff=target-env[k];
+      if(Math.abs(diff)>dead || target===0) env[k]+=diff*(diff>0?ka:kr);
+      else env[k]+=diff*kd;
+    }
+    const v=env[k]; out[k]=v<0?0:(v>255?255:(v+0.5)|0);
+  }
+  M.lastT=t; M.fresh=false;
+  raw.set(out.subarray(0,n));
+}
+
+/* =========================================================================
+   LUMI 4.1 — 13 KIỂU SÓNG MỚI (8 tròn + 5 khác)
+========================================================================= */
+const PRO_CIRCLE_STYLES=new Set(['circle_radial_bars','circle_trap_nation','circle_mirror','circle_dots','circle_light_rays','circle_neon_lightning','circle_liquid_blob','circle_hud','bass_pulse_circle']);
+function proBand(raw,norm){
+  const lo=1.6, hi=150, b=lo*Math.pow(hi/lo,Math.max(0,Math.min(1,norm)));
+  const b0=Math.floor(b), f=b-b0, n=Math.max(0,Math.min(1,norm));
+  const v=((raw[b0]||0)*(1-f)+(raw[b0+1]||0)*f)/255;
+  return Math.min(1, v*(0.78+0.62*n)); // bù treble: dải cao vốn yếu hơn bass
+}
+function proBass(raw){ let s=0; for(let i=1;i<=6;i++) s+=raw[i]||0; return s/(6*255); }
+function proRGBA(hex,a){ const [r,g,b]=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+function proMix(h1,h2,k){ const a=hexToRgb(h1), b=hexToRgb(h2); return `rgb(${Math.round(a[0]+(b[0]-a[0])*k)},${Math.round(a[1]+(b[1]-a[1])*k)},${Math.round(a[2]+(b[2]-a[2])*k)})`; }
+function proRand(i,s){ const x=Math.sin(i*127.1+s*311.7)*43758.5453; return x-Math.floor(x); }
+function proCurrentImage(t){
+  if(state.vinyl && state.vinyl.image && state.vinyl.image.naturalWidth) return state.vinyl.image;
+  const seg=sequence.find(s=>t>=s.start&&t<s.end)||sequence[0];
+  const im=seg?seg.image:state.images[0];
+  return im && im.img && im.img.naturalWidth ? im.img : null;
+}
+function proCircleGeom(w,h,t,Wv){
+  const short=Math.min(w,h), ws=Number(Wv.widthScale??75)/75;
+  let cx=w*(Number(Wv.x??50)/100), cy=h*(Number(Wv.y??50)/100), r=short*0.16*ws, onVinyl=false;
+  if(Wv.circleOnVinyl && state.vinyl && state.vinyl.enabled){
+    const m=getVinylMetrics(w,h); cx=m.cx; cy=m.cy; r=m.r*(1.0+0.10*ws); onVinyl=true;
+  }
+  const amp=short*0.10*(Number(Wv.heightScale??1.4)/1.4);
+  const rot=(t*Number(Wv.circleSpin??6))*Math.PI/180;
+  return {cx,cy,r,amp,rot,onVinyl,short};
+}
+/* giá trị đối xứng quanh vòng: bass ở đáy, treble ở đỉnh, hai bên giống nhau */
+function proSymVals(raw,N){
+  const v=new Float32Array(N);
+  for(let i=0;i<N;i++){ const a=i/N; const d=Math.abs(a-0.5)*2; v[i]=Math.pow(proBand(raw,d),1.35); }
+  return v;
+}
+function proSmoothRing(v,passes){
+  const N=v.length; let a=v, b=new Float32Array(N);
+  for(let p=0;p<passes;p++){ for(let i=0;i<N;i++) b[i]=(a[(i-1+N)%N]+2*a[i]+a[(i+1)%N])/4; const tmp=a; a=b; b=tmp; }
+  return a;
+}
+function proClosedCurve(c,pts){
+  const N=pts.length;
+  c.moveTo((pts[N-1][0]+pts[0][0])/2,(pts[N-1][1]+pts[0][1])/2);
+  for(let i=0;i<N;i++){ const p=pts[i], q=pts[(i+1)%N]; c.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2); }
+  c.closePath();
+}
+function proDrawCenter(c,G,t,bass,Wv,scaleRef){
+  if(G.onVinyl) return;
+  const mode=Wv.circleCenter||'image'; if(mode==='none') return;
+  const rr=G.r*0.9*(1+bass*0.06);
+  const img=mode==='image'?proCurrentImage(t):null;
+  c.save(); c.shadowBlur=0;
+  if(img){
+    c.beginPath(); c.arc(G.cx,G.cy,rr,0,Math.PI*2); c.save(); c.clip();
+    const s=Math.max(2*rr/img.naturalWidth,2*rr/img.naturalHeight);
+    c.translate(G.cx,G.cy); c.rotate(G.rot*0.35);
+    c.drawImage(img,-img.naturalWidth*s/2,-img.naturalHeight*s/2,img.naturalWidth*s,img.naturalHeight*s);
+    c.restore();
+    c.lineWidth=Math.max(1.5,3*scaleRef); c.strokeStyle='rgba(255,255,255,.85)';
+    c.beginPath(); c.arc(G.cx,G.cy,rr,0,Math.PI*2); c.stroke();
+  }else{
+    const g=c.createRadialGradient(G.cx,G.cy,0,G.cx,G.cy,rr);
+    g.addColorStop(0,proRGBA(Wv.color2||'#ffffff',.55+bass*.35)); g.addColorStop(.6,proRGBA(Wv.color||'#38bdf8',.18)); g.addColorStop(1,proRGBA(Wv.color||'#38bdf8',0));
+    c.fillStyle=g; c.beginPath(); c.arc(G.cx,G.cy,rr,0,Math.PI*2); c.fill();
+  }
+  c.restore();
+}
+function proRingGradient(c,G,c1,c2){
+  if(c.createConicGradient){ const g=c.createConicGradient(G.rot-Math.PI/2,G.cx,G.cy); g.addColorStop(0,c1); g.addColorStop(.5,c2); g.addColorStop(1,c1); return g; }
+  const g=c.createLinearGradient(G.cx-G.r,G.cy,G.cx+G.r,G.cy); g.addColorStop(0,c1); g.addColorStop(1,c2); return g;
+}
+const proTerrain={hist:[],lastStep:null,lastT:-1};
+
+function drawProWave(c,w,h,t,style,raw,P){
+  const Wv=state.wave, sr=P.scaleRef, C1=Wv.color||'#38bdf8', C2=Wv.color2||'#f0abfc';
+  const bass=proBass(raw);
+  if(PRO_CIRCLE_STYLES.has(style)){
+    const G=proCircleGeom(w,h,t,Wv);
+    c.lineCap='round'; c.lineJoin='round';
+
+    if(style==='circle_radial_bars'){
+      const N=120; c.beginPath();
+      for(let i=0;i<N;i++){
+        const a=G.rot-Math.PI/2+i/N*Math.PI*2, v=Math.pow(proBand(raw,i/N),1.4);
+        const len=waveSmoothHeight(i%128,Math.max(2*sr,v*G.amp*1.25));
+        c.moveTo(G.cx+Math.cos(a)*G.r,G.cy+Math.sin(a)*G.r); c.lineTo(G.cx+Math.cos(a)*(G.r+len),G.cy+Math.sin(a)*(G.r+len));
+      }
+      c.lineWidth=Math.max(1.5,G.r*2*Math.PI/N*0.55); c.strokeStyle=proRingGradient(c,G,C1,C2);
+      c.shadowColor=C2; c.shadowBlur=10*sr; c.stroke(); c.shadowBlur=0;
+      c.lineWidth=Math.max(1,1.6*sr); c.strokeStyle=proRGBA(C1,.6); c.beginPath(); c.arc(G.cx,G.cy,G.r*0.97,0,Math.PI*2); c.stroke();
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='circle_trap_nation'){
+      const N=96, base=proSmoothRing(proSymVals(raw,N),2);
+      const shake=bass*G.amp*0.10, sx=(proRand(Math.floor(t*30),1)-.5)*shake, sy=(proRand(Math.floor(t*30),2)-.5)*shake;
+      const palette=[C2,'#ff2a6d','#ffb703','#3cf7c8','#3a86ff',C1];
+      const L=palette.length;
+      for(let k=0;k<L;k++){
+        const sc=1.30-k*0.11, pts=[];
+        for(let i=0;i<N;i++){
+          const a=G.rot*0.25+Math.PI/2+i/N*Math.PI*2;
+          const rr=G.r+base[i]*G.amp*1.5*sc+(L-k)*1.2*sr;
+          pts.push([G.cx+sx+Math.cos(a)*rr,G.cy+sy+Math.sin(a)*rr]);
+        }
+        c.beginPath(); proClosedCurve(c,pts);
+        c.fillStyle=palette[k]; c.globalAlpha=k===L-1?1:.92;
+        if(k===0){ c.shadowColor=C2; c.shadowBlur=18*sr; }
+        c.fill(); c.shadowBlur=0;
+      }
+      c.globalAlpha=1;
+      const G2=Object.assign({},G,{cx:G.cx+sx,cy:G.cy+sy});
+      if(!G.onVinyl){ c.fillStyle='#05050a'; c.beginPath(); c.arc(G2.cx,G2.cy,G.r*0.97,0,Math.PI*2); c.fill(); }
+      proDrawCenter(c,G2,t,bass,Wv,sr);
+
+    }else if(style==='circle_mirror'){
+      const H=60; c.beginPath();
+      const outer=[];
+      for(let i=0;i<H;i++){
+        const v=Math.pow(proBand(raw,i/(H-1)),1.4);
+        const len=waveSmoothHeight(i,Math.max(2*sr,v*G.amp*1.2));
+        for(const side of [1,-1]){
+          const a=G.rot+Math.PI/2+side*(i+0.5)/H*Math.PI;
+          c.moveTo(G.cx+Math.cos(a)*G.r,G.cy+Math.sin(a)*G.r); c.lineTo(G.cx+Math.cos(a)*(G.r+len),G.cy+Math.sin(a)*(G.r+len));
+          outer.push([a,len]);
+        }
+      }
+      c.lineWidth=Math.max(1.5,G.r*Math.PI/H*0.5); c.strokeStyle=C1; c.shadowColor=C1; c.shadowBlur=8*sr; c.stroke(); c.shadowBlur=0;
+      c.beginPath();
+      for(const [a,len] of outer){ const l2=len*0.38; c.moveTo(G.cx+Math.cos(a)*(G.r*0.96),G.cy+Math.sin(a)*(G.r*0.96)); c.lineTo(G.cx+Math.cos(a)*(G.r*0.96-l2),G.cy+Math.sin(a)*(G.r*0.96-l2)); }
+      c.lineWidth=Math.max(1,G.r*Math.PI/H*0.32); c.strokeStyle=C2; c.stroke();
+      if(!G.onVinyl){ const G3=Object.assign({},G,{r:G.r*0.72}); proDrawCenter(c,G3,t,bass,Wv,sr); }
+
+    }else if(style==='circle_dots'){
+      const N=90, sv=proSymVals(raw,N); const main=new Path2D(), trail=new Path2D();
+      for(let i=0;i<N;i++){
+        const a=G.rot-Math.PI/2+i/N*Math.PI*2, v=sv[i];
+        const len=waveSmoothHeight(i,v*G.amp*1.3);
+        const ca=Math.cos(a), sa=Math.sin(a);
+        const r0=G.r+len, size=(1.6+3.2*v)*sr;
+        main.moveTo(G.cx+ca*r0+size,G.cy+sa*r0); main.arc(G.cx+ca*r0,G.cy+sa*r0,size,0,Math.PI*2);
+        for(let k=1;k<=3;k++){ const rk=G.r+len*(k/4), s2=size*(0.35+0.12*k); trail.moveTo(G.cx+ca*rk+s2,G.cy+sa*rk); trail.arc(G.cx+ca*rk,G.cy+sa*rk,s2,0,Math.PI*2); }
+      }
+      c.fillStyle=proRGBA(C2,.55); c.fill(trail);
+      c.fillStyle=C1; c.shadowColor=C1; c.shadowBlur=12*sr; c.fill(main); c.shadowBlur=0;
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='circle_light_rays'){
+      const N=110, reach=G.amp*1.6;
+      const halo=c.createRadialGradient(G.cx,G.cy,G.r*0.9,G.cx,G.cy,G.r+reach*(0.6+bass*0.6));
+      halo.addColorStop(0,proRGBA(C2,.30+bass*.25)); halo.addColorStop(1,proRGBA(C2,0));
+      c.fillStyle=halo; c.beginPath(); c.arc(G.cx,G.cy,G.r+reach*(0.6+bass*0.6),0,Math.PI*2); c.fill();
+      const rg=c.createRadialGradient(G.cx,G.cy,G.r,G.cx,G.cy,G.r+reach);
+      rg.addColorStop(0,proRGBA(C1,.95)); rg.addColorStop(.55,proRGBA(C2,.55)); rg.addColorStop(1,proRGBA(C2,0));
+      c.beginPath();
+      for(let i=0;i<N;i++){
+        const a=G.rot-Math.PI/2+i/N*Math.PI*2, v=Math.pow(proBand(raw,Math.abs(i/N-.5)*2),1.3);
+        const len=waveSmoothHeight(i,Math.max(3*sr,v*reach));
+        c.moveTo(G.cx+Math.cos(a)*G.r,G.cy+Math.sin(a)*G.r); c.lineTo(G.cx+Math.cos(a)*(G.r+len),G.cy+Math.sin(a)*(G.r+len));
+      }
+      c.strokeStyle=rg; c.lineWidth=Math.max(1,1.8*sr); c.stroke();
+      const parts=new Path2D(), PN=70, life=2.2;
+      for(let i=0;i<PN;i++){
+        const a=proRand(i,7)*Math.PI*2+G.rot*0.3, ph=((t/life)+proRand(i,3))%1;
+        const rr=G.r+ph*reach*1.5, s=(0.8+2.2*proRand(i,9))*sr*(1+bass);
+        parts.moveTo(G.cx+Math.cos(a)*rr+s,G.cy+Math.sin(a)*rr); parts.arc(G.cx+Math.cos(a)*rr,G.cy+Math.sin(a)*rr,s,0,Math.PI*2);
+      }
+      c.fillStyle=proRGBA(C2,.55+bass*.4); c.shadowColor=C2; c.shadowBlur=8*sr; c.fill(parts); c.shadowBlur=0;
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='circle_neon_lightning'){
+      const N=96, vals=proSmoothRing(proSymVals(raw,N),1), pts=[];
+      for(let i=0;i<N;i++){ const a=G.rot+Math.PI/2+i/N*Math.PI*2, rr=G.r+waveSmoothHeight(i,vals[i]*G.amp*1.3); pts.push([G.cx+Math.cos(a)*rr,G.cy+Math.sin(a)*rr]); }
+      c.beginPath(); proClosedCurve(c,pts);
+      c.strokeStyle=C2; c.lineWidth=Math.max(1.5,3*sr); c.shadowColor=C2; c.shadowBlur=22*sr; c.stroke();
+      c.strokeStyle='#ffffff'; c.lineWidth=Math.max(1,1.2*sr); c.shadowBlur=0; c.stroke();
+      c.beginPath(); c.arc(G.cx,G.cy,G.r,0,Math.PI*2); c.strokeStyle=C1; c.lineWidth=Math.max(1.5,4*sr); c.shadowColor=C1; c.shadowBlur=20*sr; c.stroke(); c.shadowBlur=0;
+      const seed=Math.floor(t*10), count=bass>0.42?Math.floor(2+bass*5):(bass>0.25?1:0);
+      for(let k=0;k<count;k++){
+        const a0=proRand(seed,k*3+1)*Math.PI*2, span=(0.25+proRand(seed,k*3+2)*0.6), segs=9;
+        c.beginPath();
+        for(let s=0;s<=segs;s++){
+          const a=a0+span*s/segs, jitter=(proRand(seed*31+k,s)-.5)*G.amp*0.45, rr=G.r+G.amp*(0.25+0.5*bass)+jitter;
+          const x=G.cx+Math.cos(a)*rr, y=G.cy+Math.sin(a)*rr; if(s===0)c.moveTo(x,y); else c.lineTo(x,y);
+        }
+        c.strokeStyle=proRGBA('#e0f2ff',.6+bass*.4); c.lineWidth=Math.max(1,1.6*sr); c.shadowColor=C1; c.shadowBlur=16*sr; c.stroke();
+      }
+      c.shadowBlur=0;
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='circle_liquid_blob'){
+      const N=72, vals=proSmoothRing(proSymVals(raw,N),4);
+      for(let layer=0;layer<2;layer++){
+        const pts=[], k=layer===0?1.25:0.8;
+        for(let i=0;i<N;i++){
+          const a=G.rot*0.4+i/N*Math.PI*2;
+          const wob=Math.sin(a*3+t*(1.1+layer*.4))*G.r*0.035+Math.sin(a*5-t*0.8)*G.r*0.02;
+          const rr=G.r*(layer?0.98:1.02)+vals[i]*G.amp*k+wob;
+          pts.push([G.cx+Math.cos(a)*rr,G.cy+Math.sin(a)*rr]);
+        }
+        const col=layer?C2:C1;
+        const fg=c.createRadialGradient(G.cx,G.cy,G.r*0.4,G.cx,G.cy,G.r+G.amp*1.3);
+        fg.addColorStop(0,proRGBA(col,0)); fg.addColorStop(.7,proRGBA(col,.18)); fg.addColorStop(1,proRGBA(col,.42));
+        c.beginPath(); proClosedCurve(c,pts); c.fillStyle=fg; c.fill();
+        c.strokeStyle=proRGBA(col,.9); c.lineWidth=Math.max(1.2,2.4*sr); c.shadowColor=col; c.shadowBlur=12*sr; c.stroke(); c.shadowBlur=0;
+      }
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='circle_hud'){
+      const ticks=new Path2D(), TN=120;
+      for(let i=0;i<TN;i++){
+        const a=G.rot*0.5+i/TN*Math.PI*2, long=i%10===0, r1=G.r*1.30, r2=r1+(long?G.r*0.07:G.r*0.03);
+        ticks.moveTo(G.cx+Math.cos(a)*r1,G.cy+Math.sin(a)*r1); ticks.lineTo(G.cx+Math.cos(a)*r2,G.cy+Math.sin(a)*r2);
+      }
+      c.strokeStyle=proRGBA(C1,.55); c.lineWidth=Math.max(1,1.3*sr); c.stroke(ticks);
+      const N=96, sv=proSymVals(raw,N); c.beginPath();
+      for(let i=0;i<N;i++){
+        const a=-Math.PI/2+i/N*Math.PI*2, v=Math.pow(sv[i],1.2);
+        const len=waveSmoothHeight(i,Math.max(1.5*sr,v*G.r*0.26*(Number(Wv.heightScale??1.4)/1.4)));
+        c.moveTo(G.cx+Math.cos(a)*G.r*1.02,G.cy+Math.sin(a)*G.r*1.02); c.lineTo(G.cx+Math.cos(a)*(G.r*1.02+len),G.cy+Math.sin(a)*(G.r*1.02+len));
+      }
+      c.strokeStyle=C2; c.lineWidth=Math.max(1.2,G.r*2*Math.PI/N*0.4); c.shadowColor=C2; c.shadowBlur=8*sr; c.stroke(); c.shadowBlur=0;
+      const dur=Math.max(0.001,Number(state.audio&&state.audio.duration)||getTotalDuration()||1), prog=Math.max(0,Math.min(1,t/dur)), pr=G.r*1.45;
+      c.lineWidth=Math.max(2,4*sr); c.strokeStyle=proRGBA(C1,.18); c.beginPath(); c.arc(G.cx,G.cy,pr,0,Math.PI*2); c.stroke();
+      c.strokeStyle=C1; c.shadowColor=C1; c.shadowBlur=10*sr; c.beginPath(); c.arc(G.cx,G.cy,pr,-Math.PI/2,-Math.PI/2+prog*Math.PI*2); c.stroke(); c.shadowBlur=0;
+      const hx=G.cx+Math.cos(-Math.PI/2+prog*Math.PI*2)*pr, hy=G.cy+Math.sin(-Math.PI/2+prog*Math.PI*2)*pr;
+      c.fillStyle='#ffffff'; c.beginPath(); c.arc(hx,hy,Math.max(2,5*sr),0,Math.PI*2); c.fill();
+      const fs=Math.max(10,G.r*0.16);
+      c.font=`700 ${fs}px Orbitron, Inter, sans-serif`; c.textAlign='center'; c.textBaseline='middle';
+      c.fillStyle='rgba(255,255,255,.92)'; c.shadowColor=C1; c.shadowBlur=8*sr;
+      c.fillText(`${fmtTime(t)}  /  ${fmtTime(dur)}`,G.cx,G.cy+pr+fs*1.4); c.shadowBlur=0;
+      proDrawCenter(c,G,t,bass,Wv,sr);
+
+    }else if(style==='bass_pulse_circle'){
+      const beats=(state.audio&&state.audio.beats)||[], life=1.6;
+      let lo=0, hi=beats.length; const from=t-life;
+      while(lo<hi){ const m=(lo+hi)>>1; if(beats[m]<from) lo=m+1; else hi=m; }
+      for(let i=lo;i<beats.length && beats[i]<=t;i++){
+        const age=(t-beats[i])/life, rr=G.r*(0.95+age*1.6);
+        c.strokeStyle=proRGBA(i%2?C2:C1,(1-age)*0.85); c.lineWidth=Math.max(1,(1-age)*7*sr);
+        c.beginPath(); c.arc(G.cx,G.cy,rr,0,Math.PI*2); c.stroke();
+      }
+      const pulse=G.r*(0.82+0.38*Math.pow(bass,1.2)*(Number(Wv.heightScale??1.4)/1.4));
+      const g=c.createRadialGradient(G.cx,G.cy,0,G.cx,G.cy,pulse*1.35);
+      g.addColorStop(0,proRGBA(C2,.95)); g.addColorStop(.55,proRGBA(C1,.65)); g.addColorStop(1,proRGBA(C1,0));
+      c.fillStyle=g; c.beginPath(); c.arc(G.cx,G.cy,pulse*1.35,0,Math.PI*2); c.fill();
+      c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=Math.max(1.5,3*sr); c.shadowColor=C1; c.shadowBlur=14*sr;
+      c.beginPath(); c.arc(G.cx,G.cy,pulse,0,Math.PI*2); c.stroke(); c.shadowBlur=0;
+      const G2=Object.assign({},G,{r:pulse*0.98}); proDrawCenter(c,G2,t,bass,Wv,sr);
+    }
+    return true;
+  }
+
+  const {totalWidth,startX,endX,centerX,baselineY,maxBarHeight}=P;
+  if(style==='sym_center_bars'){
+    const N=64, gap=totalWidth/N, bw=Math.max(1.5*sr,gap*0.62);
+    const grad=c.createLinearGradient(0,baselineY-maxBarHeight*1.4,0,baselineY+maxBarHeight*1.4);
+    grad.addColorStop(0,C2); grad.addColorStop(.5,C1); grad.addColorStop(1,C2);
+    c.fillStyle=grad; c.shadowColor=C1; c.shadowBlur=6*sr; c.beginPath();
+    for(let i=0;i<N;i++){
+      const norm=Math.abs((i+0.5)/N-0.5)*2, v=Math.pow(proBand(raw,norm),1.4);
+      const hh=waveSmoothHeight(i,Math.max(2*sr,v*maxBarHeight*1.35));
+      const x=startX+i*gap+(gap-bw)/2;
+      if(c.roundRect) c.roundRect(x,baselineY-hh,bw,hh*2,bw/2); else c.rect(x,baselineY-hh,bw,hh*2);
+    }
+    c.fill(); c.shadowBlur=0;
+    return true;
+  }
+  if(style==='smooth_line_wave'){
+    const N=48, pts=[];
+    for(let i=0;i<N;i++){
+      const norm=Math.abs(i/(N-1)-0.5)*2, v=Math.pow(proBand(raw,norm),1.3);
+      const env=Math.sin(Math.PI*i/(N-1));
+      pts.push([startX+i/(N-1)*totalWidth,baselineY-waveSmoothHeight(i,v*maxBarHeight*1.5*(0.35+0.65*env))]);
+    }
+    const path=new Path2D(); path.moveTo(pts[0][0],pts[0][1]);
+    for(let i=0;i<N-1;i++){ const p=pts[i], q=pts[i+1]; path.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2); }
+    path.lineTo(pts[N-1][0],pts[N-1][1]);
+    const fill=new Path2D(path); fill.lineTo(endX,baselineY); fill.lineTo(startX,baselineY); fill.closePath();
+    const fg=c.createLinearGradient(0,baselineY-maxBarHeight*1.5,0,baselineY); fg.addColorStop(0,proRGBA(C1,.35)); fg.addColorStop(1,proRGBA(C2,.02));
+    c.fillStyle=fg; c.fill(fill);
+    const lg=c.createLinearGradient(startX,0,endX,0); lg.addColorStop(0,C2); lg.addColorStop(.5,C1); lg.addColorStop(1,C2);
+    c.strokeStyle=lg; c.lineWidth=Math.max(1.5,3*sr); c.shadowColor=C1; c.shadowBlur=12*sr; c.stroke(path); c.shadowBlur=0;
+    c.save(); c.translate(0,2*baselineY); c.scale(1,-0.45); c.globalAlpha=.22; c.strokeStyle=lg; c.lineWidth=Math.max(1,2*sr); c.stroke(path); c.restore();
+    return true;
+  }
+  if(style==='particles_dance'){
+    const N=150, area=maxBarHeight*3, groups=[new Path2D(),new Path2D()];
+    for(let i=0;i<N;i++){
+      const rx=proRand(i,1), ry=proRand(i,2), sp=0.3+proRand(i,3)*0.9, ph=proRand(i,4)*Math.PI*2, orb=(6+proRand(i,5)*22)*sr;
+      const v=Math.pow(proBand(raw,rx),1.3);
+      const x=startX+rx*totalWidth+Math.cos(t*sp+ph)*orb*(1+bass);
+      const y=baselineY-ry*area+Math.sin(t*sp*1.3+ph)*orb-v*maxBarHeight*1.1;
+      const s=(1+3.4*v+bass*1.2)*sr;
+      const g=groups[i%2]; g.moveTo(x+s,y); g.arc(x,y,s,0,Math.PI*2);
+    }
+    c.fillStyle=proRGBA(C1,.85); c.shadowColor=C1; c.shadowBlur=10*sr; c.fill(groups[0]);
+    c.fillStyle=proRGBA(C2,.75); c.shadowColor=C2; c.fill(groups[1]); c.shadowBlur=0;
+    return true;
+  }
+  if(style==='terrain_3d'){
+    const L=22, M=64, T=proTerrain, step=Math.floor(t*12);
+    const snap=new Float32Array(M);
+    for(let i=0;i<M;i++){ const norm=Math.abs(i/(M-1)-0.5)*2; snap[i]=Math.pow(proBand(raw,norm),1.35)*Math.pow(Math.sin(Math.PI*i/(M-1)),1.4); }
+    if(T.lastStep===null || t<T.lastT || step-T.lastStep>24){ T.hist=[]; for(let k=0;k<L;k++) T.hist.push(snap.slice()); }
+    else { for(let s=T.lastStep;s<step;s++){ T.hist.unshift(snap.slice()); if(T.hist.length>L) T.hist.length=L; } }
+    T.lastStep=step; T.lastT=t;
+    const depthH=maxBarHeight*3.2;
+    for(let l=L-1;l>=0;l--){
+      const z=l/(L-1), arr=l===0?snap:(T.hist[l]||snap);
+      const span=totalWidth*(1-z*0.42), x0=centerX-span/2, yb=baselineY-z*depthH, amp=maxBarHeight*1.7*(1-z*0.35);
+      c.beginPath(); c.moveTo(x0,yb);
+      for(let i=0;i<M;i++) c.lineTo(x0+i/(M-1)*span,yb-arr[i]*amp);
+      c.lineTo(x0+span,yb);
+      c.fillStyle='rgba(4,4,10,.92)'; c.fill();
+      c.strokeStyle=proMix(C1,C2,z); c.globalAlpha=0.3+0.7*(1-z); c.lineWidth=Math.max(1,(1.8-z)*sr*1.2); c.stroke(); c.globalAlpha=1;
+    }
+    return true;
+  }
+  return false;
+}
+
+function bindWaveMotion(wrap){
+  const Wv=state.wave, q=s=>wrap.querySelector(s);
+  const sync=()=>{
+    q('#wMs').value=Wv.motionSmooth??60; q('#wMu').value=Wv.motionUp??1; q('#wMd').value=Wv.motionDown??1; q('#wMg').value=Wv.motionGate??15;
+    q('#wMsVal').textContent=Math.round(Wv.motionSmooth??60)+'%'; q('#wMuVal').textContent=Number(Wv.motionUp??1).toFixed(2)+'x';
+    q('#wMdVal').textContent=Number(Wv.motionDown??1).toFixed(2)+'x'; q('#wMgVal').textContent=Math.round(Wv.motionGate??15)+'%';
+    wrap.querySelectorAll('.motion-quick button').forEach(b=>{ const p=WAVE_MOTION_PRESETS[b.dataset.mq]; b.classList.toggle('active', Object.keys(p).every(k=>Math.abs(Number(Wv[k]??WAVE_MOTION_PRESETS.slow[k])-p[k])<1e-6)); });
+  };
+  wrap.querySelectorAll('.motion-quick button').forEach(b=>b.addEventListener('click',()=>{ Object.assign(Wv,WAVE_MOTION_PRESETS[b.dataset.mq]); waveMotionState.fresh=true; sync(); renderFrame(getCurTime()); }));
+  [['#wMs','motionSmooth'],['#wMu','motionUp'],['#wMd','motionDown'],['#wMg','motionGate']].forEach(([id,key])=>q(id).addEventListener('input',e=>{ Wv[key]=parseFloat(e.target.value); sync(); }));
+  const box=q('#wCircleBox'), isCirc=()=>PRO_CIRCLE_STYLES.has(Wv.style);
+  box.style.display=isCirc()?'block':'none';
+  q('#wCircVinyl').checked=!!Wv.circleOnVinyl; q('#wCircCenter').value=Wv.circleCenter||'image'; q('#wCircSpin').value=Wv.circleSpin??6;
+  q('#wCircSpinVal').textContent=(Wv.circleSpin??6)+'°/s';
+  q('#wCircVinyl').addEventListener('change',e=>{ Wv.circleOnVinyl=e.target.checked; if(Wv.circleOnVinyl && !(state.vinyl&&state.vinyl.enabled)) lumiToast('Hãy bật Đĩa than ở tab Đĩa than để sóng bao quanh đĩa'); renderFrame(getCurTime()); });
+  q('#wCircCenter').addEventListener('change',e=>{ Wv.circleCenter=e.target.value; renderFrame(getCurTime()); });
+  q('#wCircSpin').addEventListener('input',e=>{ Wv.circleSpin=parseFloat(e.target.value); q('#wCircSpinVal').textContent=Wv.circleSpin+'°/s'; renderFrame(getCurTime()); });
+  sync();
+}
+
 let waveRenderRawData = new Uint8Array(256);
 let directRenderOverlayEl = null;
 function getDirectRenderWaveFlag(){
@@ -5514,6 +5947,7 @@ function drawAveeWaveSingle(c, w, h, t){
   } else {
     rawData.fill(0);
   }
+  applyWaveMotion(rawData, t);
 
   const isVertical = state.aspect === '916';
   const scaleRef = isVertical ? (w / 1080) : (w / 1920);
@@ -5534,7 +5968,9 @@ function drawAveeWaveSingle(c, w, h, t){
 
   c.save();
 
-  if (waveStyle === 'dense_bars') {
+  if (drawProWave(c,w,h,t,waveStyle,rawData,{scaleRef,totalWidth,startX,endX,centerX,baselineY,maxBarHeight,isVertical})) {
+    // 13 kiểu sóng mới của bản 4.1
+  } else if (waveStyle === 'dense_bars') {
     const barCount = 96;
     const barWidth = Math.max(1.5 * scaleRef, (totalWidth / barCount) * 0.65);
     const barSpacing = (totalWidth - (barCount * barWidth)) / (barCount - 1);
@@ -7546,6 +7982,16 @@ function builtinPresets(){
       beatMotion:{enabled:true,intensity:.62,zoom:.05,shake:2.6,rotation:.28,flashEnabled:true,fullFlash:true,fullFlashStrength:.3},
       weather:Object.assign({},wc.bassdrop||{},{enabled:true}), batch:{effect:'zoompunch',transitionDur:.35},
       lyrics:{appearFx:'zoomin',exitFx:'zoomout',karaokeColor:'#22d3ee'}, fade:{enabled:true,inSec:1,outSec:2,color:'#000000',audio:true}}},
+    {id:'b-trap',name:'Trap Nation tròn',builtin:true,data:{
+      wave:{style:'circle_trap_nation',x:50,y:50,widthScale:75,heightScale:1.6,color:'#ffffff',color2:'#ff2a6d',circleOnVinyl:false,circleCenter:'image',circleSpin:4,motionSmooth:45,motionUp:1.3,motionDown:0.9,motionGate:12},
+      beatMotion:{enabled:true,intensity:.45,zoom:.035,shake:1.6,rotation:.12,flashEnabled:true,fullFlash:false},
+      batch:{effect:'zoompunch',transitionDur:.45}, fade:{enabled:true,inSec:1.5,outSec:2.5,color:'#000000',audio:true}}},
+    {id:'b-vinylring',name:'Ballad vòng sáng quanh đĩa than',builtin:true,data:{
+      wave:{style:'circle_light_rays',color:'#fff1c7',color2:'#f9a8d4',heightScale:1.3,widthScale:75,circleOnVinyl:true,circleSpin:3,motionSmooth:75,motionUp:0.9,motionDown:0.6,motionGate:22},
+      vinyl:{enabled:true,x:50,y:50,size:42},
+      beatMotion:{enabled:true,intensity:.18,zoom:.015,shake:.4,rotation:.05,flashEnabled:false,fullFlash:false},
+      weather:Object.assign({},wc.dreamy||{},{enabled:true}), batch:{effect:'fadeblack',transitionDur:1.2},
+      fade:{enabled:true,inSec:3,outSec:4,color:'#000000',audio:true}}},
     {id:'b-lofi',name:'Lofi chill',builtin:true,data:{
       wave:{style:'ballad_soft_bars',color:'#fde68a',color2:'#a7f3d0',heightScale:1.1,columnSpeed:.8,peakSpeed:.04},
       beatMotion:{enabled:true,intensity:.15,zoom:.012,shake:.3,rotation:.04,flashEnabled:false,fullFlash:false},
