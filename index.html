@@ -2693,7 +2693,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO</div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">M1.3</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3788,14 +3788,15 @@ async function exportShortCutMp4(){
   renderUI(0,'Khởi tạo Short MP4 — toàn bộ FX hiện tại...','--:--');
   let ve=null,ae=null,out=null;
   try{
-    const fps=30,ab=shortCutState.buffer;
+    const fps=30,ab=await ensureEncodableBuffer(shortCutState.buffer);
     const vcfg=await pickVideoConfig(canvas.width,canvas.height,fps);
     const acfg=await pickAudioConfig(ab);
     out=await createMuxerOutput(M,saveHandle,canvas.width,canvas.height,ab.sampleRate,ab.numberOfChannels,acfg.codec==='opus'?'opus':'aac');
     const muxer=out.muxer;
     ve=new VideoEncoder({output:(chunk,meta)=>muxer.addVideoChunk(chunk,meta),error:e=>console.error(e)});
-    ae=new AudioEncoder({output:(chunk,meta)=>muxer.addAudioChunk(chunk,meta),error:e=>console.error(e)});
-    ve.configure(vcfg);ae.configure(acfg);
+    const aStat=newAudioStats(acfg);
+    ae=new AudioEncoder({output:(chunk,meta)=>safeAddAudioChunk(muxer,chunk,meta,aStat),error:e=>{ if(!aStat.error) aStat.error=e; }});
+    ve.configure(vcfg);
 
     const totalFrames=Math.ceil(total*fps);
     const oldTime=document.getElementById('audioEl').currentTime||0,wasPlaying=state.playing;
@@ -3815,6 +3816,7 @@ async function exportShortCutMp4(){
     }
     await ve.flush();ve.close();ve=null;
 
+    ae.configure(acfg);
     const rate=ab.sampleRate,ch=ab.numberOfChannels,s=Math.floor(start*rate),e=Math.floor(end*rate),nf=1024;
     for(let off=s;off<e;off+=nf){
       if(directRenderAbort)throw new Error('__STOP__');
@@ -3822,10 +3824,10 @@ async function exportShortCutMp4(){
       const gainEnd=(idx)=>shortCutGainAt(localBase+idx/rate,total,fade.fadeIn,fade.fadeOut);
       for(let c=0;c<ch;c++){const src=ab.getChannelData(c);const dstOffset=c*n;for(let i=0;i<n;i++)planar[dstOffset+i]=(src[off+i]||0)*gainEnd(i);}
       const ad=new AudioData({format:'f32-planar',sampleRate:rate,numberOfFrames:n,numberOfChannels:ch,timestamp:Math.round((off-s)/rate*1e6),data:planar});
-      ae.encode(ad);ad.close();if(ae.encodeQueueSize>8)await uiYield();
+      ae.encode(ad);ad.close();if(aStat.error)throw new Error('Lỗi mã hóa âm thanh: '+(aStat.error.message||aStat.error));if(ae.encodeQueueSize>8)await uiYield();
       if(off%(nf*32)===s%(nf*32))renderUI(82+(off-s)/(e-s)*15,`Mã hóa audio Short AAC ${Math.round((off-s)/(e-s)*100)}%`,'00:01');
     }
-    await ae.flush();ae.close();ae=null;renderUI(98,'Đóng gói Short MP4...','00:01');await uiYield();
+    await ae.flush();checkAudioStats(aStat);ae.close();ae=null;renderUI(98,'Đóng gói Short MP4...','00:01');await uiYield();
     const savedToPicker=await finishMuxerOutput(out,saveFileName);
     renderUI(100,savedToPicker?'Hoàn tất — Short MP4 đã lưu':'Hoàn tất — Short MP4 giữ toàn bộ FX','DONE');
     const st=document.getElementById('shortCutStatus');if(st)st.textContent=`Đã xuất Short MP4 ${shortFmt(start)} → ${shortFmt(end)} • toàn bộ FX hiện tại • Fade in ${fade.fadeIn.toFixed(1)}s / Fade out ${fade.fadeOut.toFixed(1)}s.`;
@@ -3854,7 +3856,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.</p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Mobile 1.3 (19/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -7313,6 +7315,52 @@ async function loadProject(file) {
 }
 
 
+
+/* ---------- Âm thanh an toàn cho MP4 ---------- */
+const IS_APPLE_WEBKIT = (()=>{ const ua=navigator.userAgent||''; return /iPhone|iPad|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) || (/Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Android|Firefox/.test(ua)); })();
+let lastAudioInfo='';
+function newAudioStats(acfg){ return {codec:acfg.codec, sr:acfg.sampleRate, ch:acfg.numberOfChannels, chunks:0, bytes:0, adts:0, fixedDur:0, error:null, nextTs:null, asc:null}; }
+function safeAddAudioChunk(muxer,chunk,meta,st){
+  try{
+    let data=new Uint8Array(chunk.byteLength); chunk.copyTo(data);
+    // Gói AAC có header ADTS → bỏ header, lấy cấu hình giải mã từ header
+    if(st.codec!=='opus' && data.length>9 && data[0]===0xFF && (data[1]&0xF6)===0xF0){
+      const hdr=(data[1]&1)?7:9;
+      if(!st.asc){
+        const prof=((data[2]>>6)&3)+1, sfi=(data[2]>>2)&15, chc=((data[2]&1)<<2)|((data[3]>>6)&3);
+        st.asc=new Uint8Array([(prof<<3)|(sfi>>1), ((sfi&1)<<7)|(chc<<3)]);
+      }
+      data=data.subarray(hdr); st.adts++;
+    }
+    let m=meta;
+    if(st.asc && st.chunks===0){
+      m=Object.assign({},meta||{});
+      m.decoderConfig=Object.assign({codec:'mp4a.40.2',sampleRate:st.sr,numberOfChannels:st.ch},(meta&&meta.decoderConfig)||{},{description:st.asc});
+    }
+    // Safari có thể để trống thời lượng gói → tự tính (AAC: 1024 mẫu/gói)
+    const frames = st.codec==='opus' ? Math.round(st.sr*0.02) : 1024;
+    let dur=chunk.duration; if(!(Number.isFinite(dur) && dur>0)){ dur=Math.round(frames/st.sr*1e6); st.fixedDur++; }
+    let ts=chunk.timestamp; if(!Number.isFinite(ts) || ts<0) ts=(st.nextTs??0);
+    st.nextTs=ts+dur;
+    muxer.addAudioChunkRaw(data, chunk.type||'key', ts, dur, m);
+    st.chunks++; st.bytes+=data.length;
+  }catch(e){ console.error('audio chunk:',e); if(!st.error) st.error=e; }
+}
+function checkAudioStats(st){
+  if(st.error) throw new Error('Lỗi mã hóa âm thanh: '+(st.error.message||st.error));
+  if(!st.chunks) throw new Error('Bộ mã hóa âm thanh không tạo ra dữ liệu nên video sẽ không có tiếng. Hãy chụp màn hình thông báo này gửi lại.');
+  const chTxt = st.ch===1?'mono':(st.ch===2?'stereo':st.ch+' kênh');
+  lastAudioInfo=`Âm thanh: ${st.codec==='opus'?'Opus':'AAC'} ${(st.sr/1000).toFixed(1)}kHz ${chTxt} • ${st.chunks} gói`+(st.adts?' • ADTS':'')+(st.fixedDur?' • đã bù thời lượng':'');
+}
+async function ensureEncodableBuffer(ab){
+  const okRate = ab.sampleRate===44100 || ab.sampleRate===48000;
+  if(okRate && ab.numberOfChannels<=2) return ab;
+  const sr = okRate ? ab.sampleRate : 48000, ch=Math.min(2,ab.numberOfChannels);
+  const oac=new OfflineAudioContext(ch, Math.ceil(ab.duration*sr), sr);
+  const src=oac.createBufferSource(); src.buffer=ab; src.connect(oac.destination); src.start(0);
+  return await oac.startRendering();
+}
+
 /* =========================================================================
    LUMI MOBILE HELPERS
 ========================================================================= */
@@ -7341,10 +7389,12 @@ async function pickVideoConfig(w,h,fps){
 }
 async function pickAudioConfig(ab){
   for(const bitrate of [192000,128000,96000]){
-    const cfg={codec:'mp4a.40.2',sampleRate:ab.sampleRate,numberOfChannels:ab.numberOfChannels,bitrate};
+    const cfg={codec:'mp4a.40.2',sampleRate:ab.sampleRate,numberOfChannels:ab.numberOfChannels,bitrate,aac:{format:'aac'}};
     try{ const r=await AudioEncoder.isConfigSupported(cfg); if(r && r.supported) return cfg; }catch(_){}
   }
   // Dự phòng: một số máy (vd. Chrome trên Linux) không có AAC → dùng Opus trong MP4.
+  // Không dùng trên iPhone/Mac: app Ảnh không phát được Opus → video sẽ câm.
+  if(IS_APPLE_WEBKIT) throw new Error('Safari không mã hóa được âm thanh AAC ở cấu hình này ('+ab.sampleRate+'Hz, '+ab.numberOfChannels+' kênh). Hãy chụp màn hình thông báo này gửi lại.');
   for(const bitrate of [160000,128000]){
     const cfg={codec:'opus',sampleRate:ab.sampleRate,numberOfChannels:ab.numberOfChannels,bitrate};
     try{ const r=await AudioEncoder.isConfigSupported(cfg); if(r && r.supported){ console.warn('AAC không khả dụng, dùng Opus'); return cfg; } }catch(_){}
@@ -7379,7 +7429,8 @@ function deliverBlob(blob,fileName,title){
   const file=new File([blob],fileName,{type});
   const canShareFile=!!(navigator.canShare && (()=>{ try{ return navigator.canShare({files:[file]}); }catch(_){ return false; } })());
   ov.querySelector('#lrTitle').textContent=title;
-  ov.querySelector('#lrMeta').textContent=`${fileName} • ${fmtBytes(blob.size)}`;
+  ov.querySelector('#lrMeta').textContent=`${fileName} • ${fmtBytes(blob.size)}`+((/\.mp4$/i.test(fileName)&&lastAudioInfo)?`\n${lastAudioInfo}`:'');
+  ov.querySelector('#lrMeta').style.whiteSpace='pre-line';
   const isVideo=/\.mp4$/i.test(fileName);
   ov.querySelector('#lrTip').textContent = canShareFile
     ? (isVideo ? 'Bấm "Lưu / Chia sẻ" rồi chọn "Lưu video" để đưa vào app Ảnh, hoặc gửi thẳng qua Zalo, Messenger, AirDrop…' : 'Bấm "Lưu / Chia sẻ" rồi chọn "Lưu vào Tệp" để cất file vào iPhone hoặc iCloud Drive.')
@@ -7598,15 +7649,16 @@ async function startDirectRender(){
 
   let out=null;
   try{
-    const fps=30, ab=state.audio.buffer;
+    const fps=30, ab=await ensureEncodableBuffer(state.audio.buffer);
     const vcfg=await pickVideoConfig(canvas.width,canvas.height,fps);
     const acfg=await pickAudioConfig(ab);
 
     out=await createMuxerOutput(M,saveHandle,canvas.width,canvas.height,ab.sampleRate,ab.numberOfChannels,acfg.codec==='opus'?'opus':'aac');
     const muxer=out.muxer;
     const ve=new VideoEncoder({output:(chunk,meta)=>muxer.addVideoChunk(chunk,meta),error:e=>console.error(e)});
-    const ae=new AudioEncoder({output:(chunk,meta)=>muxer.addAudioChunk(chunk,meta),error:e=>console.error(e)});
-    ve.configure(vcfg);ae.configure(acfg);
+    const aStat=newAudioStats(acfg);
+    const ae=new AudioEncoder({output:(chunk,meta)=>safeAddAudioChunk(muxer,chunk,meta,aStat),error:e=>{ if(!aStat.error) aStat.error=e; }});
+    ve.configure(vcfg);
 
     const total=state.audio.duration,totalFrames=Math.ceil(total*fps);
     const audioEl=document.getElementById('audioEl'), oldTime=audioEl.currentTime||0, wasPlaying=state.playing;
@@ -7629,6 +7681,7 @@ async function startDirectRender(){
     }
     await ve.flush();ve.close();
 
+    ae.configure(acfg);
     const ch=ab.numberOfChannels,nf=1024;
     for(let off=0;off<ab.length;off+=nf){
       if(directRenderAbort)throw new Error('__STOP__');
@@ -7636,10 +7689,11 @@ async function startDirectRender(){
       for(let c=0;c<ch;c++)planar.set(ab.getChannelData(c).subarray(off,off+n),c*n);
       const ad=new AudioData({format:'f32-planar',sampleRate:ab.sampleRate,numberOfFrames:n,numberOfChannels:ch,timestamp:Math.round(off/ab.sampleRate*1e6),data:planar});
       ae.encode(ad);ad.close();
+      if(aStat.error)throw new Error('Lỗi mã hóa âm thanh: '+(aStat.error.message||aStat.error));
       if(ae.encodeQueueSize>8)await uiYield();
       if(off%(nf*32)===0)renderUI(82+off/ab.length*15,`Mã hóa audio AAC ${Math.round(off/ab.length*100)}%`,'00:01');
     }
-    await ae.flush();ae.close();
+    await ae.flush();checkAudioStats(aStat);ae.close();
     renderUI(98,'Đóng gói MP4...','00:01');await uiYield();
     const savedToPicker=await finishMuxerOutput(out,saveFileName);
     renderUI(100,savedToPicker?'Hoàn tất — MP4 đã lưu':'Hoàn tất — MP4 render trực tiếp','DONE');
