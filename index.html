@@ -3624,6 +3624,57 @@ function renderPanel(){
   if(activeTab==='vinyl') p.appendChild(panelVinyl());
 }
 
+
+/* ---------- Giải mã nhạc: Safari trước, WAV tự đọc nếu Safari từ chối ---------- */
+function parseWavToAudioBuffer(arr){
+  const dv=new DataView(arr);
+  const tag=o=>String.fromCharCode(dv.getUint8(o),dv.getUint8(o+1),dv.getUint8(o+2),dv.getUint8(o+3));
+  if(arr.byteLength<44 || tag(0)!=='RIFF' || tag(8)!=='WAVE') return null;
+  let off=12, fmt=null, dataOff=-1, dataLen=0;
+  while(off+8<=arr.byteLength){
+    const id=tag(off), size=dv.getUint32(off+4,true), body=off+8;
+    if(id==='fmt '){
+      let format=dv.getUint16(body,true);
+      const ch=dv.getUint16(body+2,true), rate=dv.getUint32(body+4,true), bits=dv.getUint16(body+14,true);
+      if(format===0xFFFE && size>=26) format=dv.getUint16(body+24,true); // WAVE_FORMAT_EXTENSIBLE → sub-format
+      fmt={format,ch,rate,bits};
+    }else if(id==='data'){
+      dataOff=body; dataLen=Math.min(size, arr.byteLength-body); break;
+    }
+    off=body+size+(size&1);
+  }
+  if(!fmt || dataOff<0) return null;
+  const {format,ch,rate,bits}=fmt, bps=bits>>3;
+  if(!ch || !bps || !(format===1 || format===3)) return null;
+  const frames=Math.floor(dataLen/(bps*ch));
+  if(!frames) return null;
+  const out=new AudioBuffer({length:frames,numberOfChannels:ch,sampleRate:rate});
+  const chans=[]; for(let c=0;c<ch;c++) chans.push(new Float32Array(frames));
+  let p=dataOff;
+  for(let i=0;i<frames;i++){
+    for(let c=0;c<ch;c++){
+      let v=0;
+      if(format===3){ v = bits===64 ? dv.getFloat64(p,true) : dv.getFloat32(p,true); }
+      else if(bits===8){ v=(dv.getUint8(p)-128)/128; }
+      else if(bits===16){ v=dv.getInt16(p,true)/32768; }
+      else if(bits===24){ let x=dv.getUint8(p)|(dv.getUint8(p+1)<<8)|(dv.getUint8(p+2)<<16); if(x&0x800000)x|=~0xFFFFFF; v=x/8388608; }
+      else if(bits===32){ v=dv.getInt32(p,true)/2147483648; }
+      chans[c][i]=v; p+=bps;
+    }
+  }
+  for(let c=0;c<ch;c++) out.copyToChannel(chans[c],c);
+  return out;
+}
+async function decodeAudioSmart(ac, arrBuf){
+  try{
+    return await ac.decodeAudioData(arrBuf.slice(0));
+  }catch(err){
+    const wav=parseWavToAudioBuffer(arrBuf);
+    if(wav){ console.warn('Safari không giải mã được, dùng bộ đọc WAV riêng'); return wav; }
+    throw new Error('Định dạng không được hỗ trợ'+(err&&err.message?' ('+err.message+')':''));
+  }
+}
+
 /* ---------- STANDALONE SHORT MUSIC CUTTER ---------- */
 const shortCutState={file:null,name:'',buffer:null,url:'',audio:null,duration:0,start:0,end:0,playing:false,raf:0};
 function shortFmt(t){t=Math.max(0,Number(t)||0);const m=Math.floor(t/60),s=t-m*60;return String(m).padStart(2,'0')+':'+s.toFixed(1).padStart(4,'0');}
@@ -3652,10 +3703,10 @@ async function loadShortCutFile(file){
   if(!file)return;try{
     if(shortCutState.url)URL.revokeObjectURL(shortCutState.url);if(shortCutState.audio){shortCutState.audio.pause();shortCutState.audio.removeAttribute('src');shortCutState.audio.load();}
     const arr=await file.arrayBuffer(),AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('Trình duyệt không hỗ trợ Web Audio.');
-    const ac=new AC(),buffer=await ac.decodeAudioData(arr.slice(0));await ac.close();
+    const ac=new AC(),buffer=await decodeAudioSmart(ac,arr);await ac.close();
     shortCutState.file=file;shortCutState.name=file.name;shortCutState.buffer=buffer;shortCutState.duration=buffer.duration;shortCutState.start=0;shortCutState.end=buffer.duration;shortCutState.url=URL.createObjectURL(file);
     shortCutState.audio=new Audio(shortCutState.url);shortCutState.audio.preload='auto';shortCutState.audio.addEventListener('ended',()=>{shortCutState.playing=false;updateShortCutUI();});updateShortCutUI();
-  }catch(e){alert('Không đọc được file nhạc: '+e.message);}
+  }catch(e){alert('Không mở được file nhạc: '+e.message+'\n\nHãy dùng file MP3, M4A, AAC hoặc WAV.');}
 }
 function syncShortCutFromInputs(){
   const dur=shortCutState.duration;let s=parseFloat(document.getElementById('shortCutStart')?.value)||0,e=parseFloat(document.getElementById('shortCutEnd')?.value)||0;
@@ -3793,7 +3844,7 @@ async function exportShortCutMp4(){
 }
 
 function panelShortCut(){
-  const wrap=el(`<div id="shortCutPanel"><div class="sc-head"><h3 style="margin:0">Cắt nhạc làm Short</h3><span class="sc-badge">ĐỘC LẬP</span></div><p class="hint">Chọn một đoạn nhạc rồi xuất thành file mới. Không thay đổi timeline, ảnh, Beat FX, sóng Avee hay dự án hiện tại.</p><div class="sc-drop" id="shortCutDrop"><div id="shortCutDropText">Chọn hoặc kéo thả file MP3 / WAV</div><input type="file" id="shortCutInput" accept="audio/*" style="display:none"></div><div class="sc-wave" id="shortCutWave"><canvas id="shortCutWaveCanvas"></canvas><div id="shortCutSelection" class="sc-selection"></div><div id="shortCutMarker" class="sc-marker" style="left:0"></div></div><div class="sc-timebar"><span id="shortCutTimeRange">00:00.0 → 00:00.0</span><span>Độ dài: <b id="shortCutDuration">00:00.0</b></span></div><div class="sc-grid2"><div class="field"><label>Bắt đầu (giây)</label><input class="sc-num" id="shortCutStart" type="number" min="0" step="0.1" value="0"></div><div class="field"><label>Kết thúc (giây)</label><input class="sc-num" id="shortCutEnd" type="number" min="0" step="0.1" value="0"></div></div><div class="divider"></div><div class="field"><label>Cắt nhanh</label><div class="sc-presets"><button class="btn-sm" data-sc-preset="15">15s</button><button class="btn-sm" data-sc-preset="30">30s</button><button class="btn-sm" data-sc-preset="45">45s</button><button class="btn-sm" data-sc-preset="60">60s</button></div></div><div class="sc-checkline"><input type="checkbox" id="shortCutFadeEnabled" checked><span>Fade in / Fade out cho audio</span></div><div class="sc-fadebox"><div class="field" style="margin-bottom:0"><label>Fade in (giây)</label><input class="sc-num" id="shortCutFadeIn" type="number" min="0" max="10" step="0.1" value="0.8"></div><div class="field" style="margin-bottom:0"><label>Fade out (giây)</label><input class="sc-num" id="shortCutFadeOut" type="number" min="0" max="10" step="0.1" value="1.2"></div></div><div class="sc-grid2" style="margin-top:8px"><button class="btn-sm" id="shortCutPlayBtn">Nghe đoạn cắt</button><button class="btn-primary-sm" id="shortCutExportBtn">Xuất WAV</button></div><button class="btn-primary-sm sc-mp4btn" id="shortCutExportMp4Btn">Xuất Short MP4 — Ăn toàn bộ FX hiện tại</button><div id="shortCutStatus" class="sc-status">Short MP4 sẽ dùng toàn bộ ảnh, chuyển cảnh, Beat FX, sóng Avee, tiêu đề và lyric đang cấu hình trong tool. Fade in/out áp dụng cho audio xuất ra.</div><div class="sc-mini">Tính năng này dùng file nhạc riêng, không dùng dữ liệu của module Nhạc/Timeline hiện tại.</div></div>`);
+  const wrap=el(`<div id="shortCutPanel"><div class="sc-head"><h3 style="margin:0">Cắt nhạc làm Short</h3><span class="sc-badge">ĐỘC LẬP</span></div><p class="hint">Chọn một đoạn nhạc rồi xuất thành file mới. Không thay đổi timeline, ảnh, Beat FX, sóng Avee hay dự án hiện tại.</p><div class="sc-drop" id="shortCutDrop"><div id="shortCutDropText">Chọn hoặc kéo thả file MP3 / WAV</div><input type="file" id="shortCutInput" style="display:none"></div><div class="sc-wave" id="shortCutWave"><canvas id="shortCutWaveCanvas"></canvas><div id="shortCutSelection" class="sc-selection"></div><div id="shortCutMarker" class="sc-marker" style="left:0"></div></div><div class="sc-timebar"><span id="shortCutTimeRange">00:00.0 → 00:00.0</span><span>Độ dài: <b id="shortCutDuration">00:00.0</b></span></div><div class="sc-grid2"><div class="field"><label>Bắt đầu (giây)</label><input class="sc-num" id="shortCutStart" type="number" min="0" step="0.1" value="0"></div><div class="field"><label>Kết thúc (giây)</label><input class="sc-num" id="shortCutEnd" type="number" min="0" step="0.1" value="0"></div></div><div class="divider"></div><div class="field"><label>Cắt nhanh</label><div class="sc-presets"><button class="btn-sm" data-sc-preset="15">15s</button><button class="btn-sm" data-sc-preset="30">30s</button><button class="btn-sm" data-sc-preset="45">45s</button><button class="btn-sm" data-sc-preset="60">60s</button></div></div><div class="sc-checkline"><input type="checkbox" id="shortCutFadeEnabled" checked><span>Fade in / Fade out cho audio</span></div><div class="sc-fadebox"><div class="field" style="margin-bottom:0"><label>Fade in (giây)</label><input class="sc-num" id="shortCutFadeIn" type="number" min="0" max="10" step="0.1" value="0.8"></div><div class="field" style="margin-bottom:0"><label>Fade out (giây)</label><input class="sc-num" id="shortCutFadeOut" type="number" min="0" max="10" step="0.1" value="1.2"></div></div><div class="sc-grid2" style="margin-top:8px"><button class="btn-sm" id="shortCutPlayBtn">Nghe đoạn cắt</button><button class="btn-primary-sm" id="shortCutExportBtn">Xuất WAV</button></div><button class="btn-primary-sm sc-mp4btn" id="shortCutExportMp4Btn">Xuất Short MP4 — Ăn toàn bộ FX hiện tại</button><div id="shortCutStatus" class="sc-status">Short MP4 sẽ dùng toàn bộ ảnh, chuyển cảnh, Beat FX, sóng Avee, tiêu đề và lyric đang cấu hình trong tool. Fade in/out áp dụng cho audio xuất ra.</div><div class="sc-mini">Tính năng này dùng file nhạc riêng, không dùng dữ liệu của module Nhạc/Timeline hiện tại.</div></div>`);
   wrap.querySelector('#shortCutDrop').addEventListener('click',()=>wrap.querySelector('#shortCutInput').click());wrap.querySelector('#shortCutInput').addEventListener('change',e=>{if(e.target.files[0])loadShortCutFile(e.target.files[0]);});wrap.querySelector('#shortCutDrop').addEventListener('dragover',e=>e.preventDefault());wrap.querySelector('#shortCutDrop').addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])loadShortCutFile(e.dataTransfer.files[0]);});wrap.querySelector('#shortCutStart').addEventListener('input',syncShortCutFromInputs);wrap.querySelector('#shortCutEnd').addEventListener('input',syncShortCutFromInputs);wrap.querySelector('#shortCutPlayBtn').addEventListener('click',playShortCut);wrap.querySelector('#shortCutExportBtn').addEventListener('click',exportShortCut);wrap.querySelector('#shortCutExportMp4Btn').addEventListener('click',exportShortCutMp4);wrap.querySelector('#shortCutFadeEnabled').addEventListener('change',()=>{if(shortCutState.playing)updateShortCutPlayVolume();});wrap.querySelector('#shortCutFadeIn').addEventListener('input',()=>{if(shortCutState.playing)updateShortCutPlayVolume();});wrap.querySelector('#shortCutFadeOut').addEventListener('input',()=>{if(shortCutState.playing)updateShortCutPlayVolume();});wrap.querySelectorAll('[data-sc-preset]').forEach(b=>b.addEventListener('click',()=>setShortPreset(parseFloat(b.dataset.scPreset))));
   const wave=wrap.querySelector('#shortCutWave');wave.addEventListener('click',e=>{if(!shortCutState.duration)return;const r=wave.getBoundingClientRect(),t=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*shortCutState.duration,len=shortCutState.end-shortCutState.start,s=Math.max(0,Math.min(shortCutState.duration-Math.min(len,shortCutState.duration),t-Math.min(len,shortCutState.duration)/2));shortCutState.start=s;shortCutState.end=Math.min(shortCutState.duration,s+Math.min(len,shortCutState.duration));updateShortCutUI();});
   setTimeout(updateShortCutUI,0);return wrap;
@@ -3808,7 +3859,7 @@ function panelMusic(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
     </div>
-    <input type="file" id="audioInput" accept="audio/*" style="display:none;">
+    <input type="file" id="audioInput" style="display:none;">
     <div id="beatInfoWrap"></div>
     <div class="divider"></div>
     <div class="field">
@@ -4885,7 +4936,7 @@ async function loadAudio(file){
   audioEl.load();
 
   const arrBuf = await file.arrayBuffer();
-  const buf = await audioCtx.decodeAudioData(arrBuf.slice(0));
+  const buf = await decodeAudioSmart(audioCtx, arrBuf);
   state.audio.buffer = buf;
   state.audio.duration = buf.duration;
   
@@ -4898,7 +4949,7 @@ async function loadAudio(file){
     updatePlayhead(0);
   }catch(err){
     console.error('loadAudio:', err);
-    alert('Không load được file nhạc: ' + (err && err.message ? err.message : err));
+    alert('Không mở được file nhạc: ' + (err && err.message ? err.message : err) + '\n\nHãy dùng file MP3, M4A, AAC hoặc WAV.');
   }
 }
 
