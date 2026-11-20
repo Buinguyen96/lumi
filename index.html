@@ -2714,6 +2714,8 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 @keyframes tsHit{0%{transform:scale(.96);filter:brightness(1.3);}100%{transform:scale(1);}}
 .ts-row{display:flex;gap:8px;margin-top:8px;}
 .ts-row button{flex:1;}
+.l44-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
+.l44-quick .btn-sm{padding:7px 4px;font-size:11.5px;}
 .motion-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
 .motion-quick button{padding:8px 4px;}
 .motion-quick button.active{border-color:#ff9a3c;color:#ffb067;background:#2a1a10;}
@@ -2732,7 +2734,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.3</span></div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.4</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3900,7 +3902,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.3 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.4 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -7321,6 +7323,79 @@ window.addEventListener('load',()=>{
   setTimeout(()=>{ UNDO.ready=true; l43UndoCommit(); },600);
 });
 
+
+/* =========================================================================
+   LUMI 4.4 — ĐỘ RÕ / MỜ cho sóng nhạc & đĩa than, bật/tắt thời gian đĩa than
+   Vẽ vào một lớp riêng rồi ghép lại → độ trong suốt đều, không bị đậm ở chỗ chồng nét.
+========================================================================= */
+const L44={};
+function l44Num(v,d){ v=Number(v); return Number.isFinite(v)?v:d; }
+function l44Layer(name,opacity,blur,drawFn){
+  opacity=Math.max(0,Math.min(1,opacity)); blur=Math.max(0,Math.min(1,blur));
+  if(opacity<=.001) return;
+  if(opacity>=.999&&blur<=.005){ drawFn(ctx); return; }
+  const cw=canvas.width, ch=canvas.height;
+  let o=L44[name]; if(!o){ const cv=document.createElement('canvas'); o=L44[name]={cv,x:cv.getContext('2d')}; }
+  if(o.cv.width!==cw||o.cv.height!==ch){ o.cv.width=cw; o.cv.height=ch; }
+  const x=o.x; x.setTransform(1,0,0,1,0,0); x.globalAlpha=1; x.globalCompositeOperation='source-over'; x.clearRect(0,0,cw,ch);
+  x.setTransform(cw/W,0,0,ch/H,0,0);
+  drawFn(x);
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha=opacity; ctx.imageSmoothingEnabled=true;
+  if(blur>.005){
+    const f=1+blur*13, sm=l43Down(o.cv,0,0,cw,ch,f);
+    if(f>4){ const mw=Math.min(cw,sm.w*3), mh=Math.min(ch,sm.h*3), up=l43Cv(3,mw,mh);
+      up.x.imageSmoothingEnabled=true; up.x.globalCompositeOperation='copy'; up.x.drawImage(sm.cv,0,0,sm.w,sm.h,0,0,mw,mh); up.x.globalCompositeOperation='source-over';
+      ctx.drawImage(up.cv,0,0,mw,mh,0,0,cw,ch); }
+    else ctx.drawImage(sm.cv,0,0,sm.w,sm.h,0,0,cw,ch);
+  } else ctx.drawImage(o.cv,0,0);
+  ctx.restore();
+}
+function lumi44DrawWave(t){
+  const Wv=state.wave;
+  l44Layer('wave',l44Num(Wv.opacity,100)/100,l44Num(Wv.blur,0)/100,c=>drawAveeWave(c,W,H,t));
+}
+function lumi44DrawVinyl(t){
+  const V=state.vinyl; if(!V||V.enabled===false) return;
+  l44Layer('vinyl',l44Num(V.opacity,100)/100,l44Num(V.blur,0)/100,c=>drawVinyl(c,W,H,t));
+}
+function l44ClarityBox(prefix,obj){
+  const op=l44Num(obj.opacity,100), bl=l44Num(obj.blur,0);
+  return el(`<div class="batch-box"><div class="title">◈ Độ rõ / mờ</div>
+    <div class="field"><label>Độ đậm (100% = rõ hẳn, thấp = trong suốt) <span class="rangeval" id="${prefix}OpV">${Math.round(op)}%</span></label><input type="range" id="${prefix}Op" min="0" max="100" step="1" value="${op}"></div>
+    <div class="field"><label>Độ nhòe (0% = sắc nét, cao = mờ nhòe) <span class="rangeval" id="${prefix}BlV">${Math.round(bl)}%</span></label><input type="range" id="${prefix}Bl" min="0" max="100" step="1" value="${bl}"></div>
+    <div class="l44-quick"><button class="btn-sm" data-op="100" data-bl="0">Rõ nét</button><button class="btn-sm" data-op="70" data-bl="0">Hơi mờ</button><button class="btn-sm" data-op="45" data-bl="15">Mờ nhẹ</button><button class="btn-sm" data-op="30" data-bl="45">Mờ ảo</button></div>
+  </div>`);
+}
+function l44BindClarity(box,prefix,obj){
+  const op=box.querySelector('#'+prefix+'Op'), bl=box.querySelector('#'+prefix+'Bl');
+  const sync=()=>{ op.value=l44Num(obj.opacity,100); bl.value=l44Num(obj.blur,0);
+    box.querySelector('#'+prefix+'OpV').textContent=Math.round(op.value)+'%'; box.querySelector('#'+prefix+'BlV').textContent=Math.round(bl.value)+'%'; };
+  const rf=()=>renderFrame(getCurTime());
+  op.addEventListener('input',()=>{ obj.opacity=+op.value; sync(); rf(); });
+  bl.addEventListener('input',()=>{ obj.blur=+bl.value; sync(); rf(); });
+  box.querySelectorAll('.l44-quick button').forEach(b=>b.addEventListener('click',()=>{ obj.opacity=+b.dataset.op; obj.blur=+b.dataset.bl; sync(); rf(); }));
+  sync();
+}
+const __panelWave44=panelWave;
+panelWave=function(){
+  const wrap=__panelWave44(), Wv=state.wave, box=l44ClarityBox('w44',Wv);
+  const anchor=wrap.querySelector('#wMotionBox')||(wrap.querySelector('#wEnabled')&&wrap.querySelector('#wEnabled').closest('.checkline'));
+  if(anchor) anchor.after(box); else wrap.appendChild(box);
+  l44BindClarity(box,'w44',Wv); return wrap;
+};
+const __panelVinyl44=panelVinyl;
+panelVinyl=function(){
+  const wrap=__panelVinyl44(), V=state.vinyl;
+  const en=wrap.querySelector('#vinylEnabled'), line=en&&en.closest('.checkline');
+  if(line){ line.lastChild.textContent=' Bật đĩa than'; }
+  const hint=wrap.querySelector('.hint'); if(hint) hint.innerHTML='Đĩa than, glow và thời gian là <b>một nhóm</b>. Kéo trực tiếp trên đĩa để di chuyển cả cụm.';
+  const tl=el(`<div class="checkline"><input type="checkbox" id="vinylShowTime" ${V.showTime!==false?'checked':''}> Hiện thời gian (đếm ngược dưới đĩa)</div>`);
+  const box=l44ClarityBox('v44',V);
+  if(line){ line.after(tl); tl.after(box); } else { wrap.prepend(box); wrap.prepend(tl); }
+  tl.querySelector('#vinylShowTime').addEventListener('change',e=>{ V.showTime=e.target.checked; renderFrame(getCurTime()); });
+  l44BindClarity(box,'v44',V); return wrap;
+};
+
 let waveRenderRawData = new Uint8Array(256);
 let directRenderOverlayEl = null;
 function getDirectRenderWaveFlag(){
@@ -8571,6 +8646,7 @@ function drawVinyl(c,w,h,t){
 
   c.restore();
 
+  if(V.showTime===false) return;
   /* Digital countdown — premium fixed-width HUD, mechanically attached to the record group. */
   const remain=Math.max(0,duration-(Number(t)||0));
   const fontPx=h*(Number(V.countdownSize??4.2)/100);
@@ -8707,9 +8783,9 @@ function renderFrame(t){
   const bmNow=getBeatMotion(t);
   drawBeatFlash(ctx,W,H,Math.max(bmNow.flash,getFullFrameFlash(t)));
 
-  drawAveeWave(ctx, W, H, t);
+  lumi44DrawWave(t);
   drawWeatherFX(ctx, W, H, t);
-  drawVinyl(ctx, W, H, t);
+  lumi44DrawVinyl(t);
 
   lumi43Letterbox(ctx);
   if(state.title.show && state.title.text){
