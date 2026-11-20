@@ -2702,7 +2702,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.1</span></div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.2</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3406,94 +3406,70 @@ const EFFECTS = [
 ];
 
 const AVEE_WAVE_STYLES = [
-  {id:'dense_bars', name:'📊 1. 96 Cột Mini Avee + Hạt đỉnh rơi'},
-  {id:'smooth_wave', name:'〰️ 2. Dải sóng mềm Neon phát sáng kép'},
-  {id:'ultra_fine_bars', name:'📊 3. 128 Cột siêu thanh mảnh'},
-  {id:'multi_ribbon_wave', name:'〰️ 4. Sóng dải ruy băng 3 màu 3 tầng'},
-  {id:'color_shift_bars', name:'📊 5. Cột Gradient Disco đổi màu'},
-  {id:'neon_stroke_wave', name:'〰️ 6. Sóng Neon phát sáng rực rỡ'},
-  {id:'dual_mirror_columns', name:'📊 7. Cột kép đối xứng trên - dưới'},
-  {id:'wave_peak_glow', name:'〰️ 8. Sóng kết hợp đỉnh chấm sáng'},
-  {id:'center_peak_bars', name:'📊 9. Cột nhịp Bass dốc từ tâm'},
-  {id:'interlaced_wave', name:'〰️ 10. Sóng kép đan xen âm dương'},
-  {id:'ballad_soft_bars', name:'🌿 11. Cây mềm Ballad — cột mảnh dịu'},
-  {id:'ballad_glow_stems', name:'🌱 12. Cây Glow — thân mềm + đầu sáng'},
-  {id:'ballad_forest', name:'🌾 13. Rừng nhịp — cây cao thấp tự nhiên'},
-  {id:'ballad_sprout', name:'🍃 14. Mầm lá Ballad — thân + hạt sáng'},
-  {id:'ballad_silk_columns', name:'🌙 15. Cột lụa Ballad — mảnh, mềm, rơi chậm'},
-  {id:'ballad_dual_soft', name:'💗 16. Cột đôi mềm Ballad — song tầng dịu'},
-  {id:'ballad_crescent', name:'🌒 17. Cột nguyệt Ballad — đỉnh cong nhẹ'},
-  {id:'ballad_glass_rain', name:'💎 18. Cột thủy tinh Ballad — thanh mảnh trong'},
-  {id:'ballad_bloom', name:'🌸 19. Cột nở Ballad — chân nhỏ, đỉnh mở'},
-  {id:'edm_strobe_bars', name:'⚡ 20. Strobe Bars EDM — cột đánh mạnh, nét gọn'},
-  {id:'edm_dual_pulse', name:'🔥 21. Dual Pulse EDM — cột kép đối nhịp'},
-  {id:'edm_turbo_columns', name:'🚀 22. Turbo Columns EDM — dày và bùng nổ'},
-  {id:'edm_mirror_bass', name:'🔊 23. Mirror Bass EDM — bass đối xứng'},
-  {id:'edm_neon_peak', name:'💥 24. Neon Peak EDM — đỉnh sáng bật mạnh'},
-  {id:'edm_luxury_neon_ribbon', name:'〰️ 25. Luxury Neon Ribbon EDM — dây neon cao cấp'},
-  {id:'edm_laser_spectrum', name:'〰️ 26. Laser Spectrum EDM — tia laser phổ tần'},
-  {id:'edm_chrome_vortex', name:'〰️ 27. Chrome Vortex EDM — dây xoáy chrome'},
-  {id:'edm_quantum_ribbon', name:'〰️ 28. Quantum Ribbon EDM — ruy băng lượng tử'},
-  {id:'edm_prism_flow', name:'〰️ 29. Prism Flow EDM — dây lăng kính chuyển sắc'},
-  {id:'edm_velvet_pulse', name:'〰️ 30. Velvet Pulse EDM — xung dây nhung mềm'},
-  {id:'edm_holographic_dual', name:'〰️ 31. Holographic Dual EDM — đôi dây holographic'},
-  {id:'edm_crown_wave', name:'〰️ 32. Crown Wave EDM — sóng vương miện'},
-  {id:'edm_infinite_arc', name:'〰️ 33. Infinite Arc EDM — cung vô cực phát sáng'},
-  {id:'edm_diamond_current', name:'〰️ 34. Diamond Current EDM — dòng điện kim cương'},
-  {id:'ballad_pearl_columns', name:'🌹 35. Pearl Columns Ballad — cột ngọc trai'},
-  {id:'ballad_champagne_stems', name:'🥂 36. Champagne Stems Ballad — thân champagne'},
-  {id:'ballad_crystal_towers', name:'💎 37. Crystal Towers Ballad — tháp pha lê mảnh'},
-  {id:'ballad_satin_fan', name:'🪭 38. Satin Fan Ballad — quạt lụa đối xứng'},
-  {id:'ballad_royal_spires', name:'👑 39. Royal Spires Ballad — cột tháp hoàng gia'},
-  {id:'ballad_moon_columns', name:'🌙 40. Moon Columns Ballad — cột nguyệt mềm'},
-  {id:'ballad_rose_gold_lines', name:'🌸 41. Rose Gold Lines Ballad — đường hồng kim'},
-  {id:'ballad_aurora_columns', name:'✨ 42. Aurora Columns Ballad — cột cực quang'},
-  {id:'ballad_silk_lotus', name:'🪷 43. Silk Lotus Ballad — cột sen lụa'},
-  {id:'ballad_diamond_bloom', name:'💠 44. Diamond Bloom Ballad — nụ kim cương'},
-  {id:'ballad_pearl_fountain', name:'🫧 45. Pearl Fountain Ballad — suối ngọc mềm'},
-  {id:'ballad_velvet_spires', name:'🩷 46. Velvet Spires Ballad — tháp nhung cao thấp'},
-  {id:'ballad_mist_columns', name:'🌫️ 47. Mist Columns Ballad — cột sương mịn'},
-  {id:'ballad_opal_ripple', name:'🔮 48. Opal Ripple Ballad — gợn opal sang trọng'},
-  {id:'ballad_crystal_piano', name:'🎹 49. Crystal Piano Ballad — phím pha lê'},
-  {id:'ballad_swan_feathers', name:'🪽 50. Swan Feathers Ballad — lông thiên nga'},
-  {id:'ballad_lace_towers', name:'🕊️ 51. Lace Towers Ballad — tháp ren mảnh'},
-  {id:'ballad_moonlight_drops', name:'🌙 52. Moonlight Drops Ballad — giọt trăng'},
-  {id:'ballad_chandelier', name:'💎 53. Chandelier Ballad — chùm pha lê'},
-  {id:'ballad_sapphire_columns', name:'💙 54. Sapphire Columns Ballad — cột sapphire'},
-  {id:'ballad_amethyst_veil', name:'💜 55. Amethyst Veil Ballad — màn thạch anh tím'},
-  {id:'ballad_ivory_fan', name:'🤍 56. Ivory Fan Ballad — quạt ngà thanh lịch'},
-  {id:'ballad_golden_rain', name:'✨ 57. Golden Rain Ballad — mưa chỉ vàng'},
-  {id:'ballad_lotus_crown', name:'👑 58. Lotus Crown Ballad — vương miện sen'},
-  {id:'ballad_royal_curtain', name:'🎀 59. Royal Curtain Ballad — rèm lụa hoàng gia'},
-  {id:'ballad_glass_flame', name:'🔥 60. Glass Flame Ballad — ngọn lửa thủy tinh'},
-  {id:'ballad_diamond_drizzle', name:'❄️ 61. Diamond Drizzle Ballad — mưa kim cương'},
-  {id:'ballad_aurora_fan', name:'🌌 62. Aurora Fan Ballad — quạt cực quang'},
-  {id:'ballad_rosary_lines', name:'📿 63. Rosary Lines Ballad — chuỗi ngọc tinh tế'},
-  {id:'ballad_velvet_crown', name:'👑 64. Velvet Crown Ballad — vương miện nhung cao cấp'},
-  {id:'wire_silk_thread', name:'〰️ 65. Silk Thread — dây lụa mảnh, mềm và sang'},
-  {id:'wire_dual_helix', name:'〰️ 66. Dual Helix — đôi dây xoắn nhẹ đối xứng'},
-  {id:'wire_neon_thread', name:'〰️ 67. Neon Thread — dây neon lõi sáng cao cấp'},
-  {id:'wire_crystal_trace', name:'〰️ 68. Crystal Trace — dây pha lê + hạt đỉnh'},
-  {id:'wire_aurora_flow', name:'〰️ 69. Aurora Flow — 3 dây cực quang mềm'},
-  {id:'wire_laser_ribbon', name:'〰️ 70. Laser Ribbon — đôi dây laser mảnh'},
-  {id:'wire_pulse_arc', name:'〰️ 71. Pulse Arc — dây cong theo năng lượng nhạc'},
-  {id:'wire_glass_echo', name:'〰️ 72. Glass Echo — dây kính + bóng vọng mờ'},
-  {id:'wire_infinity_loop', name:'〰️ 73. Infinity Loop — đôi dây giao thoa nhẹ'},
-  {id:'wire_spectrum_thread', name:'〰️ 74. Spectrum Thread — dây phổ tần chuyển sắc'},
-  {id:'circle_radial_bars', pro:true, name:'⭕ 76. Vòng cột tỏa ra — phổ tròn kinh điển'},
-  {id:'circle_trap_nation', pro:true, name:'⭕ 77. Trap Nation — nhiều lớp màu rung theo bass'},
-  {id:'circle_mirror', pro:true, name:'⭕ 78. Vòng đối xứng — cột trong & ngoài'},
-  {id:'circle_dots', pro:true, name:'⭕ 79. Vòng chấm sáng'},
-  {id:'circle_light_rays', pro:true, name:'⭕ 80. Vòng tia sáng + hạt (hợp Ballad)'},
-  {id:'circle_neon_lightning', pro:true, name:'⭕ 81. Vòng neon tia điện (hợp EDM)'},
-  {id:'circle_liquid_blob', pro:true, name:'⭕ 82. Vòng sóng mềm như chất lỏng (hợp Lofi)'},
-  {id:'circle_hud', pro:true, name:'⭕ 83. Vòng HUD — vòng tiến trình + đồng hồ'},
-  {id:'bass_pulse_circle', pro:true, name:'💥 84. Nhịp bass — khối tròn + gợn sóng'},
-  {id:'sym_center_bars', pro:true, name:'📊 85. Cột đối xứng trên dưới'},
-  {id:'smooth_line_wave', pro:true, name:'〰️ 86. Đường sóng mượt + phản chiếu'},
-  {id:'particles_dance', pro:true, name:'✨ 87. Hạt nhảy múa theo nhạc'},
-  {id:'terrain_3d', pro:true, name:'🏔️ 88. Địa hình sóng 3D (Joy Division)'}
+  // ⭕ Tròn & hình khối
+  {id:'circle_radial_bars', grp:'circle', name:'⭕ Vòng cột tỏa ra — phổ tròn kinh điển'},
+  {id:'circle_trap_nation', grp:'circle', name:'⭕ Trap Nation — nhiều lớp màu rung theo bass'},
+  {id:'circle_mirror', grp:'circle', name:'⭕ Vòng đối xứng — cột trong & ngoài'},
+  {id:'circle_dots', grp:'circle', name:'⭕ Vòng chấm sáng'},
+  {id:'circle_light_rays', grp:'circle', name:'⭕ Vòng tia sáng + hạt (hợp Ballad)'},
+  {id:'circle_neon_lightning', grp:'circle', name:'⭕ Vòng neon tia điện (hợp EDM)'},
+  {id:'circle_liquid_blob', grp:'circle', name:'⭕ Vòng sóng mềm như chất lỏng (hợp Lofi)'},
+  {id:'circle_hud', grp:'circle', name:'⭕ Vòng HUD — vòng tiến trình + đồng hồ'},
+  {id:'bass_pulse_circle', grp:'circle', name:'💥 Nhịp bass — khối tròn + gợn sóng'},
+  {id:'polygon_spectrum', grp:'circle', isNew:true, name:'⬡ Lục giác phổ — cột tỏa từ 6 cạnh'},
+  {id:'heart_spectrum', grp:'circle', isNew:true, name:'💗 Trái tim phổ — đập theo bass (nhạc tình yêu)'},
+  {id:'kaleido_tunnel', grp:'circle', isNew:true, name:'🌀 Đường hầm kính vạn hoa — lao về phía trước'},
+  // 〰️ Dải sóng & đường
+  {id:'siri_wave', grp:'line', isNew:true, name:'〰️ Sóng Siri — 4 dải màu đan nhau'},
+  {id:'aurora_ribbons', grp:'line', isNew:true, name:'🌌 Dải cực quang Aurora — rèm sáng mềm (Ballad)'},
+  {id:'oscilloscope', grp:'line', isNew:true, name:'📈 Máy hiện sóng — dạng sóng âm thật, neon'},
+  {id:'glitch_wave', grp:'line', isNew:true, name:'⚡ Sóng Glitch — nhiễu tách màu khi bass mạnh (Rap/Trap)'},
+  {id:'dna_helix', grp:'line', isNew:true, name:'🧬 Xoắn ADN 3D — chuỗi hạt sáng'},
+  {id:'smooth_line_wave', grp:'line', name:'〰️ Đường sóng mượt + phản chiếu'},
+  // 📊 Cột & đồng hồ
+  {id:'audiogram_scroll', grp:'bars', isNew:true, name:'🎙️ Audiogram cuộn — kiểu podcast / SoundCloud'},
+  {id:'led_meter', grp:'bars', isNew:true, name:'🟩 Đèn LED xếp khối — xanh/vàng/đỏ + đỉnh treo'},
+  {id:'reflect_bars', grp:'bars', isNew:true, name:'🪞 Cột phản chiếu mặt nước'},
+  {id:'pixel_bars', grp:'bars', isNew:true, name:'👾 Pixel 8-bit — cột ô vuông kiểu game cũ'},
+  {id:'vu_meter', grp:'bars', isNew:true, name:'🎚️ Đồng hồ VU kim — analog cổ điển (Bolero/Jazz)'},
+  {id:'sym_center_bars', grp:'bars', name:'📊 Cột đối xứng trên dưới'},
+  // 🌌 3D & không gian
+  {id:'synthwave', grp:'scene', isNew:true, name:'🌅 Synthwave — mặt trời, lưới neon, núi phổ'},
+  {id:'city_3d', grp:'scene', isNew:true, name:'🏙️ Thành phố 3D — nhà cao lên theo nhạc'},
+  {id:'spectrogram', grp:'scene', isNew:true, name:'🔥 Thác phổ (spectrogram) — dải màu cuộn lên'},
+  {id:'terrain_3d', grp:'scene', name:'🏔️ Địa hình sóng 3D (Joy Division)'},
+  {id:'particles_dance', grp:'scene', name:'✨ Hạt nhảy múa theo nhạc'},
+  // 🎛️ Cổ điển chọn lọc (17 kiểu khác nhau rõ rệt)
+  {id:'dense_bars', grp:'classic', name:'📊 96 Cột Mini Avee + Hạt đỉnh rơi'},
+  {id:'color_shift_bars', grp:'classic', name:'📊 Cột Gradient Disco đổi màu'},
+  {id:'center_peak_bars', grp:'classic', name:'📊 Cột nhịp Bass dốc từ tâm'},
+  {id:'edm_neon_peak', grp:'classic', name:'💥 Neon Peak EDM — đỉnh sáng bật mạnh'},
+  {id:'ballad_glow_stems', grp:'classic', name:'🌱 Cây Glow — thân mềm + đầu sáng'},
+  {id:'ballad_diamond_bloom', grp:'classic', name:'💠 Diamond Bloom Ballad — nụ kim cương'},
+  {id:'ballad_crystal_piano', grp:'classic', name:'🎹 Crystal Piano Ballad — phím pha lê'},
+  {id:'ballad_chandelier', grp:'classic', name:'💎 Chandelier Ballad — chùm pha lê'},
+  {id:'ballad_lotus_crown', grp:'classic', name:'👑 Lotus Crown Ballad — vương miện sen'},
+  {id:'smooth_wave', grp:'classic', name:'〰️ Dải sóng mềm Neon phát sáng kép'},
+  {id:'multi_ribbon_wave', grp:'classic', name:'〰️ Sóng dải ruy băng 3 màu 3 tầng'},
+  {id:'interlaced_wave', grp:'classic', name:'〰️ Sóng kép đan xen âm dương'},
+  {id:'edm_luxury_neon_ribbon', grp:'classic', name:'〰️ Luxury Neon Ribbon EDM — dây neon cao cấp'},
+  {id:'edm_chrome_vortex', grp:'classic', name:'〰️ Chrome Vortex EDM — dây xoáy chrome'},
+  {id:'edm_holographic_dual', grp:'classic', name:'〰️ Holographic Dual EDM — đôi dây holographic'},
+  {id:'wire_dual_helix', grp:'classic', name:'〰️ Dual Helix — đôi dây xoắn nhẹ đối xứng'},
+  {id:'wire_spectrum_thread', grp:'classic', name:'〰️ Spectrum Thread — dây phổ tần chuyển sắc'}
 ];
+// Kiểu cũ đã bỏ (trùng lặp) → tự chuyển sang kiểu giống nhất, để dự án / mẫu cũ vẫn mở được.
+const LUMI_STYLE_REMAP = {"ultra_fine_bars": "color_shift_bars", "neon_stroke_wave": "ballad_crystal_piano", "dual_mirror_columns": "color_shift_bars", "wave_peak_glow": "ballad_diamond_bloom", "ballad_soft_bars": "color_shift_bars", "ballad_forest": "ballad_glow_stems", "ballad_sprout": "ballad_glow_stems", "ballad_silk_columns": "ballad_glow_stems", "ballad_dual_soft": "ballad_glow_stems", "ballad_crescent": "ballad_glow_stems", "ballad_glass_rain": "ballad_glow_stems", "ballad_bloom": "ballad_glow_stems", "edm_strobe_bars": "edm_neon_peak", "edm_dual_pulse": "ballad_glow_stems", "edm_turbo_columns": "edm_neon_peak", "edm_mirror_bass": "center_peak_bars", "edm_laser_spectrum": "ballad_crystal_piano", "edm_quantum_ribbon": "wire_spectrum_thread", "edm_prism_flow": "wire_spectrum_thread", "edm_velvet_pulse": "edm_holographic_dual", "edm_crown_wave": "edm_luxury_neon_ribbon", "edm_infinite_arc": "ballad_crystal_piano", "edm_diamond_current": "ballad_chandelier", "ballad_pearl_columns": "ballad_diamond_bloom", "ballad_champagne_stems": "ballad_glow_stems", "ballad_crystal_towers": "ballad_glow_stems", "ballad_satin_fan": "ballad_glow_stems", "ballad_royal_spires": "ballad_glow_stems", "ballad_moon_columns": "ballad_glow_stems", "ballad_rose_gold_lines": "ballad_glow_stems", "ballad_aurora_columns": "ballad_glow_stems", "ballad_silk_lotus": "ballad_diamond_bloom", "ballad_pearl_fountain": "ballad_crystal_piano", "ballad_velvet_spires": "ballad_crystal_piano", "ballad_mist_columns": "ballad_diamond_bloom", "ballad_opal_ripple": "ballad_diamond_bloom", "ballad_swan_feathers": "ballad_diamond_bloom", "ballad_lace_towers": "edm_neon_peak", "ballad_moonlight_drops": "edm_neon_peak", "ballad_sapphire_columns": "ballad_crystal_piano", "ballad_amethyst_veil": "ballad_crystal_piano", "ballad_ivory_fan": "wire_spectrum_thread", "ballad_golden_rain": "ballad_crystal_piano", "ballad_royal_curtain": "ballad_crystal_piano", "ballad_glass_flame": "ballad_crystal_piano", "ballad_diamond_drizzle": "ballad_crystal_piano", "ballad_aurora_fan": "ballad_diamond_bloom", "ballad_rosary_lines": "edm_neon_peak", "ballad_velvet_crown": "ballad_chandelier", "wire_silk_thread": "ballad_diamond_bloom", "wire_neon_thread": "wire_spectrum_thread", "wire_crystal_trace": "wire_dual_helix", "wire_aurora_flow": "ballad_diamond_bloom", "wire_laser_ribbon": "wire_dual_helix", "wire_pulse_arc": "wire_dual_helix", "wire_glass_echo": "ballad_diamond_bloom", "wire_infinity_loop": "ballad_diamond_bloom"};
+const LUMI_WAVE_GROUPS = [['circle','⭕ Tròn & hình khối'],['line','〰️ Dải sóng & đường'],['bars','📊 Cột & đồng hồ'],['scene','🌌 3D & không gian'],['classic','🎛️ Cổ điển chọn lọc']];
+function lumiNormWaveStyle(id){
+  if(LUMI_STYLE_REMAP[id]) return LUMI_STYLE_REMAP[id];
+  return AVEE_WAVE_STYLES.some(s=>s.id===id) ? id : 'dense_bars';
+}
+function lumiWaveOptionsHTML(){
+  const Wv=state.wave; Wv.style=lumiNormWaveStyle(Wv.style);
+  let n=0;
+  return LUMI_WAVE_GROUPS.map(([g,label])=>`<optgroup label="${label}">${AVEE_WAVE_STYLES.filter(w=>w.grp===g).map(w=>{ n++; return `<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${n}. ${w.name}${w.isNew?' ★MỚI':''}</option>`; }).join('')}</optgroup>`).join('');
+}
 
 const TOTAL_PEAK_BARS = 128;
 let peakHeights = new Float32Array(TOTAL_PEAK_BARS).fill(0);
@@ -3889,7 +3865,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.1 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.2 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -4768,14 +4744,13 @@ function panelWave(){
   const Wv = state.wave;
   const wrap = el(`<div>
     <h3>Sóng nhạc (Avee Visualizer Pro)</h3>
-    <p class="hint">88 kiểu sóng chuyên nghiệp (có 9 kiểu tròn) — Ballad & EDM, gồm nhiều phong cách luxury. Tùy chỉnh vị trí kéo sát mép hoặc kéo sâu xuống dưới viền.</p>
+    <p class="hint">46 kiểu sóng chọn lọc, không trùng lặp — tròn & hình khối, dải sóng, cột & đồng hồ VU, 3D, cổ điển. Kiểu có ★MỚI là kiểu vừa thêm. Tùy chỉnh vị trí kéo sát mép hoặc kéo sâu xuống dưới viền.</p>
     <div class="checkline"><input type="checkbox" id="wEnabled" ${Wv.enabled?'checked':''}> Bật sóng nhạc</div>
     
     <div class="field">
       <label>Mẫu sóng Avee Pro</label>
       <select id="wStyleSelect">
-        <optgroup label="★ MỚI — Sóng tròn & kiểu hot">${AVEE_WAVE_STYLES.filter(w=>w.pro).map(w=>`<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${w.name}</option>`).join('')}</optgroup>
-        <optgroup label="Kiểu cổ điển (1–75)">${AVEE_WAVE_STYLES.filter(w=>!w.pro).map(w=>`<option value="${w.id}" ${w.id===Wv.style?'selected':''}>${w.name}</option>`).join('')}</optgroup>
+        ${lumiWaveOptionsHTML()}
       </select>
     </div>
 
@@ -5647,6 +5622,7 @@ function proRingGradient(c,G,c1,c2){
 const proTerrain={hist:[],lastStep:null,lastT:-1};
 
 function drawProWave(c,w,h,t,style,raw,P){
+  if(drawProWave42(c,w,h,t,style,raw,P)) return true;
   const Wv=state.wave, sr=P.scaleRef, C1=Wv.color||'#38bdf8', C2=Wv.color2||'#f0abfc';
   const bass=proBass(raw);
   if(PRO_CIRCLE_STYLES.has(style)){
@@ -5914,6 +5890,525 @@ function bindWaveMotion(wrap){
   sync();
 }
 
+
+/* =========================================================================
+   LUMI 4.2 — 16 KIỂU SÓNG MỚI (dải sóng, cột, đồng hồ, 3D, hình khối)
+   Mọi kiểu đều tính theo thời gian bài hát → xem trước và video giống nhau.
+========================================================================= */
+const PRO42_CENTER_STYLES=['polygon_spectrum','heart_spectrum','kaleido_tunnel'];
+PRO42_CENTER_STYLES.forEach(s=>PRO_CIRCLE_STYLES.add(s));
+const pro42State={};
+function pro42S(){ const k=(typeof waveActiveSlot!=='undefined'?waveActiveSlot:'single'); return pro42State[k]||(pro42State[k]={}); }
+function pro42Smooth(){ return Math.max(0,Math.min(100,Number(state.wave.motionSmooth??60)))/100; }
+function pro42Clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function pro42RR(p,x,y,w,h,r){
+  if(h<=0||w<=0) return;
+  r=Math.max(0,Math.min(r,w/2,h/2));
+  if(p.roundRect){ p.roundRect(x,y,w,h,r); return; }
+  p.moveTo(x+r,y); p.lineTo(x+w-r,y); p.quadraticCurveTo(x+w,y,x+w,y+r); p.lineTo(x+w,y+h-r); p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  p.lineTo(x+r,y+h); p.quadraticCurveTo(x,y+h,x,y+h-r); p.lineTo(x,y+r); p.quadraticCurveTo(x,y,x+r,y); p.closePath();
+}
+/* Đường bao âm lượng 100 lần/giây, tính 1 lần cho mỗi bài (dùng cho audiogram + đồng hồ VU) */
+const pro42Env={buf:null,rate:100,L:null,R:null};
+function pro42Envelope(){
+  const buf=state.audio&&state.audio.buffer; if(!buf) return null;
+  if(pro42Env.buf===buf) return pro42Env;
+  const sr=buf.sampleRate, hop=Math.max(2,Math.round(sr/pro42Env.rate)), n=Math.floor(buf.length/hop);
+  const chL=buf.getChannelData(0), chR=buf.numberOfChannels>1?buf.getChannelData(1):chL;
+  const L=new Float32Array(n), R=new Float32Array(n), half=hop>>1;
+  for(let i=0;i<n;i++){
+    let sl=0, s2=0; const o=i*hop;
+    for(let j=0;j<hop;j+=2){ const a=chL[o+j], b=chR[o+j]; sl+=a*a; s2+=b*b; }
+    L[i]=sl/half; R[i]=s2/half; // lưu bình phương trung bình
+  }
+  pro42Env.buf=buf; pro42Env.L=L; pro42Env.R=R; return pro42Env;
+}
+function pro42Rms(arr,t0,t1){
+  if(!arr) return 0;
+  const r=pro42Env.rate; let i0=Math.floor(t0*r), i1=Math.ceil(t1*r);
+  i0=Math.max(0,i0); i1=Math.min(arr.length,i1); if(i1<=i0) return 0;
+  let s=0; for(let i=i0;i<i1;i++) s+=arr[i];
+  return Math.sqrt(s/(i1-i0));
+}
+function pro42Db01(rms,lo,hi){ const db=20*Math.log10(Math.max(1e-6,rms)); return pro42Clamp((db-lo)/(hi-lo),0,1); }
+/* Đỉnh treo rơi chậm (LED / pixel) — theo thời gian */
+function pro42Peaks(key,lit,t,fall){
+  const S=pro42S(), N=lit.length; let P=S[key];
+  if(!P||P.v.length!==N){ P=S[key]={v:new Float32Array(N),hold:new Float32Array(N),t:-1}; }
+  const dt=P.t<0?0:t-P.t, reset=P.t<0||dt<0||dt>0.6;
+  for(let i=0;i<N;i++){
+    if(reset||lit[i]>=P.v[i]){ P.v[i]=lit[i]; P.hold[i]=0.45; }
+    else if(dt>0){ P.hold[i]-=dt; if(P.hold[i]<=0) P.v[i]=Math.max(lit[i],P.v[i]-dt*fall); }
+  }
+  P.t=t; return P.v;
+}
+function pro42Polyline(c,pts){ c.moveTo(pts[0][0],pts[0][1]); for(let i=0;i<pts.length-1;i++){ const p=pts[i], q=pts[i+1]; c.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2); } const l=pts[pts.length-1]; c.lineTo(l[0],l[1]); }
+function pro42EdgeGrad(c,x0,x1,col,a){ const g=c.createLinearGradient(x0,0,x1,0); g.addColorStop(0,proRGBA(col,0)); g.addColorStop(.18,proRGBA(col,a)); g.addColorStop(.82,proRGBA(col,a)); g.addColorStop(1,proRGBA(col,0)); return g; }
+function pro42ClipCenterImage(c,pathFn,G,t,Wv,bass,sr,col){
+  if(G.onVinyl) return;
+  const mode=Wv.circleCenter||'image'; if(mode==='none') return;
+  const img=mode==='image'?proCurrentImage(t):null;
+  c.save(); c.beginPath(); pathFn(c);
+  if(img){
+    c.save(); c.clip();
+    const rr=G.r*1.15, s=Math.max(2*rr/img.naturalWidth,2*rr/img.naturalHeight);
+    c.translate(G.cx,G.cy); c.rotate(G.rot*0.35);
+    c.drawImage(img,-img.naturalWidth*s/2,-img.naturalHeight*s/2,img.naturalWidth*s,img.naturalHeight*s);
+    c.restore();
+    c.lineWidth=Math.max(1.5,3*sr); c.strokeStyle='rgba(255,255,255,.85)'; c.stroke();
+  }else{
+    const g=c.createRadialGradient(G.cx,G.cy,0,G.cx,G.cy,G.r);
+    g.addColorStop(0,proRGBA(Wv.color2||'#ffffff',.55+bass*.35)); g.addColorStop(.7,proRGBA(col,.18)); g.addColorStop(1,proRGBA(col,0));
+    c.fillStyle=g; c.fill();
+  }
+  c.restore();
+}
+
+function drawProWave42(c,w,h,t,style,raw,P){
+  const Wv=state.wave, sr=P.scaleRef, C1=Wv.color||'#38bdf8', C2=Wv.color2||'#f0abfc';
+  const {totalWidth,startX,endX,centerX,baselineY,maxBarHeight}=P;
+  const bass=proBass(raw);
+  c.lineCap='round'; c.lineJoin='round';
+
+  /* ---------------- DẢI SÓNG ---------------- */
+  if(style==='siri_wave'){
+    const cy=baselineY-maxBarHeight*0.95, A=maxBarHeight*1.15, M=90;
+    const defs=[[C1,0,.22,1.5,1.1,0],[C2,.18,.45,2.2,-1.35,1.7],['#ff3b8d',.4,.7,2.8,1.7,3.1],['#3cf7c8',.65,1,3.5,-2.1,4.4]];
+    c.save(); c.globalCompositeOperation='lighter';
+    const sup=pro42EdgeGrad(c,startX,endX,'#ffffff',.35); c.strokeStyle=sup; c.lineWidth=Math.max(1,1.2*sr);
+    c.beginPath(); c.moveTo(startX,cy); c.lineTo(endX,cy); c.stroke();
+    defs.forEach((d,k)=>{
+      let e=0; for(let j=0;j<6;j++) e+=proBand(raw,d[1]+(d[2]-d[1])*j/5); e=Math.pow(e/6,1.15);
+      e=waveSmoothHeight(120+k,e);
+      const amp=A*(0.05+0.95*e), top=[], bot=[];
+      for(let i=0;i<M;i++){
+        const u=i/(M-1), att=Math.pow(Math.sin(Math.PI*u),2.2);
+        const y=amp*att*Math.sin(2*Math.PI*d[3]*u+t*d[4]+d[5])*(0.85+0.15*Math.sin(t*0.7+k));
+        const x=startX+u*totalWidth; top.push([x,cy-y]); bot.push([x,cy+y]);
+      }
+      const g=pro42EdgeGrad(c,startX,endX,d[0],.55);
+      c.beginPath(); pro42Polyline(c,top); for(let i=M-1;i>=0;i--) c.lineTo(bot[i][0],bot[i][1]); c.closePath();
+      c.fillStyle=g; c.fill();
+      c.beginPath(); pro42Polyline(c,top); c.strokeStyle=pro42EdgeGrad(c,startX,endX,d[0],.25); c.lineWidth=Math.max(2,6*sr); c.stroke();
+      c.strokeStyle=pro42EdgeGrad(c,startX,endX,d[0],.95); c.lineWidth=Math.max(1,1.6*sr); c.stroke();
+    });
+    c.restore(); return true;
+  }
+
+  if(style==='aurora_ribbons'){
+    const cols=[C1,C2,proMix(C1,C2,.5)], N=40;
+    c.save(); c.globalCompositeOperation='lighter';
+    for(let k=0;k<3;k++){
+      const top=[], bot=[], col=cols[k];
+      const base=baselineY-maxBarHeight*(0.75+0.55*k);
+      for(let i=0;i<N;i++){
+        const u=i/(N-1), x=startX+u*totalWidth;
+        const yc=base+Math.sin(u*Math.PI*2*0.8+t*0.35*(k+1)+k*2)*maxBarHeight*0.35+Math.sin(u*Math.PI*2*1.9-t*0.5+k)*maxBarHeight*0.14;
+        const norm=pro42Clamp(Math.abs(u-.5)*2*0.7+k*0.15,0,1);
+        const v=waveSmoothHeight(k*40+i,Math.pow(proBand(raw,norm),1.2));
+        const env=Math.pow(Math.sin(Math.PI*u),0.8), th=maxBarHeight*(0.22+1.45*v)*env;
+        top.push([x,yc-th]); bot.push([x,yc+th*0.22]);
+      }
+      let minY=1e9, maxY=-1e9; for(const p of top) minY=Math.min(minY,p[1]); for(const p of bot) maxY=Math.max(maxY,p[1]);
+      const g=c.createLinearGradient(0,minY,0,maxY);
+      g.addColorStop(0,proRGBA(col,0)); g.addColorStop(.55,proRGBA(col,.22)); g.addColorStop(.9,proRGBA(col,.55)); g.addColorStop(1,proRGBA(col,0));
+      c.beginPath(); pro42Polyline(c,top); for(let i=N-1;i>=0;i--) c.lineTo(bot[i][0],bot[i][1]); c.closePath();
+      c.fillStyle=g; c.fill();
+      // vệt rèm cực quang
+      c.beginPath();
+      for(let i=0;i<N*2;i++){
+        const f=i/(N*2-1)*(N-1), i0=Math.floor(f), i1=Math.min(N-1,i0+1), q=f-i0;
+        const x=top[i0][0]+(top[i1][0]-top[i0][0])*q, y0=top[i0][1]+(top[i1][1]-top[i0][1])*q, y1=bot[i0][1]+(bot[i1][1]-bot[i0][1])*q;
+        c.moveTo(x,y1); c.lineTo(x,y0+(y1-y0)*0.15);
+      }
+      c.strokeStyle=proRGBA(col,.10); c.lineWidth=Math.max(1,2*sr); c.stroke();
+      c.beginPath(); pro42Polyline(c,bot); c.strokeStyle=pro42EdgeGrad(c,startX,endX,col,.22); c.lineWidth=Math.max(2,6*sr); c.stroke();
+      c.strokeStyle=pro42EdgeGrad(c,startX,endX,col,.75); c.lineWidth=Math.max(1,1.5*sr); c.stroke();
+    }
+    c.restore(); return true;
+  }
+
+  if(style==='oscilloscope'){
+    const S=pro42S(), N=180, buf=state.audio&&state.audio.buffer;
+    if(!S.osc){ S.osc=new Float32Array(N); S.oscPrev=new Float32Array(N); S.oscT=-1; }
+    const target=S.oscTmp||(S.oscTmp=new Float32Array(N)); target.fill(0);
+    if(buf){
+      const rate=buf.sampleRate, ch0=buf.getChannelData(0), ch1=buf.numberOfChannels>1?buf.getChannelData(1):ch0;
+      const span=Math.round(rate*0.045), step=Math.max(1,Math.floor(span/N)), search=Math.round(rate*0.02);
+      let s0=Math.round(t*rate)-span-search;
+      const lp=(k)=>{ let a=0; for(let j=0;j<24;j++){ const q=k+j; if(q>=0&&q<ch0.length) a+=ch0[q]+ch1[q]; } return a; };
+      let trig=s0, prev=lp(s0);
+      for(let k=s0+4;k<s0+search;k+=4){ const v=lp(k); if(prev<0&&v>=0){ trig=k; break; } prev=v; }
+      const g=2.4*(Number(Wv.heightScale??1.4)/1.4);
+      for(let i=0;i<N;i++){
+        let a=0, n=0; const o=trig+i*step;
+        for(let j=0;j<step;j++){ const q=o+j; if(q>=0&&q<ch0.length){ a+=(ch0[q]+ch1[q])*0.5; n++; } }
+        target[i]=Math.tanh((n?a/n:0)*g);
+      }
+    }
+    const dt=S.oscT<0?0:t-S.oscT, reset=S.oscT<0||dt<0||dt>0.6, sm=pro42Smooth();
+    const k=reset?1:(dt===0?0:1-Math.exp(-dt/(0.004+0.16*Math.pow(sm,1.5))));
+    S.oscPrev.set(S.osc);
+    for(let i=0;i<N;i++) S.osc[i]+= (target[i]-S.osc[i])*k;
+    S.oscT=t;
+    const cy=baselineY-maxBarHeight*1.0, A=maxBarHeight*1.15;
+    const mk=(arr)=>{ const pts=[]; for(let i=0;i<N;i++){ const u=i/(N-1), env=Math.pow(Math.sin(Math.PI*u),0.35); pts.push([startX+u*totalWidth,cy-arr[i]*A*env]); } return pts; };
+    c.save();
+    c.strokeStyle=pro42EdgeGrad(c,startX,endX,C1,.18); c.lineWidth=Math.max(1,sr);
+    c.beginPath(); c.moveTo(startX,cy); c.lineTo(endX,cy); c.moveTo(startX,cy-A); c.lineTo(endX,cy-A); c.moveTo(startX,cy+A); c.lineTo(endX,cy+A); c.stroke();
+    c.globalCompositeOperation='lighter';
+    const prevPts=mk(S.oscPrev), pts=mk(S.osc);
+    c.beginPath(); pro42Polyline(c,prevPts); c.strokeStyle=proRGBA(C2,.22); c.lineWidth=Math.max(1.5,4*sr); c.stroke();
+    c.beginPath(); pro42Polyline(c,pts); c.strokeStyle=proRGBA(C1,.5); c.lineWidth=Math.max(2,7*sr); c.shadowColor=C1; c.shadowBlur=18*sr; c.stroke();
+    c.shadowBlur=0; c.strokeStyle='rgba(255,255,255,.95)'; c.lineWidth=Math.max(1,1.6*sr); c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='glitch_wave'){
+    const N=72, cy=baselineY-maxBarHeight*1.0, A=maxBarHeight*1.25, pts=[];
+    for(let i=0;i<N;i++){
+      const u=i/(N-1), v=Math.pow(proBand(raw,Math.abs(u-.5)*2),1.3), env=Math.pow(Math.sin(Math.PI*u),0.6);
+      const hh=waveSmoothHeight(i,v*A*env)+1.5*sr;
+      pts.push([startX+u*totalWidth,cy+(i%2?1:-1)*hh]);
+    }
+    const g=pro42Clamp((bass-0.32)/0.4,0,1), split=(2+11*g)*sr;
+    const drawLine=(dx,col,lw)=>{ c.beginPath(); c.moveTo(pts[0][0]+dx,pts[0][1]); for(let i=1;i<N;i++) c.lineTo(pts[i][0]+dx,pts[i][1]); c.strokeStyle=col; c.lineWidth=lw; c.stroke(); };
+    c.save(); c.globalCompositeOperation='lighter'; c.lineJoin='miter';
+    const lw=Math.max(1.5,2.6*sr);
+    drawLine(-split,'rgba(255,32,80,.85)',lw); drawLine(split,'rgba(32,240,255,.85)',lw); drawLine(0,proRGBA(C1,.95),lw*0.8);
+    if(g>0.04){
+      const seed=Math.floor(t*14);
+      for(let s=0;s<6;s++){
+        const y0=cy-A*1.3+proRand(seed,s*5+1)*A*2.6, hh=(4+proRand(seed,s*5+2)*22)*sr, dx=(proRand(seed,s*5+3)-.5)*60*g*sr;
+        c.save(); c.beginPath(); c.rect(startX-80*sr,y0,totalWidth+160*sr,hh); c.clip();
+        drawLine(dx,proRGBA(s%2?C2:'#ffffff',.9),lw); c.restore();
+      }
+      c.fillStyle=proRGBA(C2,.55*g);
+      for(let s=0;s<Math.round(8*g);s++){
+        const x=startX+proRand(seed,s*7+11)*totalWidth, y=cy-A+proRand(seed,s*7+12)*A*2;
+        c.fillRect(x,y,(6+proRand(seed,s*7+13)*40)*sr,(2+proRand(seed,s*7+14)*6)*sr);
+      }
+    }
+    c.restore(); return true;
+  }
+
+  if(style==='dna_helix'){
+    const N=40, cy=baselineY-maxBarHeight*1.15, turns=2.0;
+    const backA=new Path2D(), backB=new Path2D(), frontA=new Path2D(), frontB=new Path2D(), rungs=new Path2D();
+    for(let i=0;i<N;i++){
+      const u=i/(N-1), x=startX+u*totalWidth, ph=u*turns*Math.PI*2+t*1.2;
+      const v=waveSmoothHeight(i,Math.pow(proBand(raw,Math.abs(u-.5)*2),1.2));
+      const A=maxBarHeight*(0.3+1.05*v)*Math.pow(Math.sin(Math.PI*(0.04+0.92*u)),0.4);
+      const s=Math.sin(ph), z=Math.cos(ph), y1=cy+A*s, y2=cy-A*s;
+      const r1=(3+4.5*v)*sr*(1+0.5*z), r2=(3+4.5*v)*sr*(1-0.5*z);
+      (z>=0?frontA:backA).moveTo(x+r1,y1); (z>=0?frontA:backA).arc(x,y1,r1,0,Math.PI*2);
+      (z<0?frontB:backB).moveTo(x+r2,y2); (z<0?frontB:backB).arc(x,y2,r2,0,Math.PI*2);
+      rungs.moveTo(x,y1); rungs.lineTo(x,y2);
+    }
+    c.save();
+    c.fillStyle=proRGBA(C1,.5); c.fill(backA); c.fillStyle=proRGBA(C2,.5); c.fill(backB);
+    c.strokeStyle=proRGBA(proMix(C1,C2,.5),.45); c.lineWidth=Math.max(1,2.2*sr); c.stroke(rungs);
+    c.shadowBlur=12*sr; c.shadowColor=C1; c.fillStyle=C1; c.fill(frontA); c.shadowColor=C2; c.fillStyle=C2; c.fill(frontB);
+    c.restore(); return true;
+  }
+
+  /* ---------------- CỘT & ĐỒNG HỒ ---------------- */
+  if(style==='audiogram_scroll'){
+    const env=pro42Envelope(), span=6, dtBar=0.1, cy=baselineY-maxBarHeight*0.95;
+    const pxPerSec=totalWidth/span, bw=Math.max(2*sr,pxPerSec*dtBar*0.55);
+    const past=new Path2D(), fut=new Path2D();
+    const k0=Math.floor((t-span/2)/dtBar)-1, k1=Math.ceil((t+span/2)/dtBar)+1;
+    for(let k=k0;k<=k1;k++){
+      const tk=k*dtBar; if(tk<0) continue;
+      const x=centerX+(tk+dtBar/2-t)*pxPerSec;
+      if(x<startX-bw||x>endX+bw) continue;
+      const lv=env?Math.pow(pro42Db01(pro42Rms(env.L,tk,tk+dtBar)*0.5+pro42Rms(env.R,tk,tk+dtBar)*0.5,-42,-6),1.25):0;
+      const hh=Math.max(2.5*sr,lv*maxBarHeight*1.15);
+      pro42RR(tk+dtBar<=t?past:fut,x-bw/2,cy-hh,bw,hh*2,bw/2);
+    }
+    c.save();
+    const lg=pro42EdgeGrad(c,startX,endX,C1,1);
+    c.fillStyle=pro42EdgeGrad(c,startX,endX,'#ffffff',.28); c.fill(fut);
+    const pg=c.createLinearGradient(startX,0,centerX,0); pg.addColorStop(0,proRGBA(C2,0)); pg.addColorStop(.25,proRGBA(C2,.9)); pg.addColorStop(1,C1);
+    c.fillStyle=pg; c.shadowColor=C1; c.shadowBlur=8*sr; c.fill(past); c.shadowBlur=0;
+    c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=Math.max(1.5,2.4*sr); c.shadowColor=C1; c.shadowBlur=12*sr;
+    c.beginPath(); c.moveTo(centerX,cy-maxBarHeight*1.35); c.lineTo(centerX,cy+maxBarHeight*1.35); c.stroke();
+    c.fillStyle='#ffffff'; c.beginPath(); c.arc(centerX,cy-maxBarHeight*1.35,Math.max(2.5,4.5*sr),0,Math.PI*2); c.fill();
+    c.restore(); return true;
+  }
+
+  if(style==='led_meter'){
+    const N=32, R=14, colW=totalWidth/N, cw=colW*0.78, H=maxBarHeight*2.2, ch=H/R, gy=ch*0.24;
+    const lit=new Float32Array(N);
+    for(let i=0;i<N;i++){ const v=Math.pow(proBand(raw,i/(N-1)),1.2); lit[i]=Math.min(R,Math.floor(waveSmoothHeight(i,v*R)+0.25)); }
+    const peaks=pro42Peaks('led',lit,t,9*Number(Wv.motionDown??1));
+    const off=new Path2D(), on=[new Path2D(),new Path2D(),new Path2D()], pk=[new Path2D(),new Path2D(),new Path2D()];
+    const band=r=>r<R*0.6?0:(r<R*0.85?1:2);
+    for(let i=0;i<N;i++){
+      const x=startX+i*colW+(colW-cw)/2, pr=Math.round(peaks[i])-1;
+      for(let r=0;r<R;r++){
+        const y=baselineY-(r+1)*ch+gy/2;
+        if(r<lit[i]) on[band(r)].rect(x,y,cw,ch-gy);
+        else if(r===pr && pr>=0) pk[band(r)].rect(x,y,cw,ch-gy);
+        else off.rect(x,y,cw,ch-gy);
+      }
+    }
+    const COL=['#22e55a','#ffd60a','#ff3b30'];
+    c.save(); c.fillStyle='rgba(255,255,255,.06)'; c.fill(off);
+    for(let b=0;b<3;b++){ c.fillStyle=COL[b]; c.shadowColor=COL[b]; c.shadowBlur=9*sr; c.fill(on[b]); c.fillStyle='#ffffff'; c.fill(pk[b]); }
+    c.restore(); return true;
+  }
+
+  if(style==='reflect_bars'){
+    const N=56, gap=totalWidth/N, bw=gap*0.6, top=new Path2D(), refl=new Path2D(), Hm=maxBarHeight*1.6;
+    for(let i=0;i<N;i++){
+      const v=Math.pow(proBand(raw,i/(N-1)),1.3), hh=Math.max(2*sr,waveSmoothHeight(i,v*Hm));
+      const x=startX+i*gap+(gap-bw)/2;
+      if(top.roundRect) top.roundRect(x,baselineY-hh,bw,hh,[bw/2,bw/2,0,0]); else top.rect(x,baselineY-hh,bw,hh);
+      const sx=Math.sin(t*2.2+i*0.55)*1.4*sr;
+      refl.rect(x+sx,baselineY+2*sr,bw,hh*0.62);
+    }
+    c.save();
+    const g=c.createLinearGradient(0,baselineY-Hm,0,baselineY); g.addColorStop(0,C2); g.addColorStop(1,C1);
+    c.fillStyle=g; c.shadowColor=C1; c.shadowBlur=10*sr; c.fill(top); c.shadowBlur=0;
+    const rg=c.createLinearGradient(0,baselineY,0,baselineY+Hm*0.62); rg.addColorStop(0,proRGBA(C1,.42)); rg.addColorStop(1,proRGBA(C2,0));
+    c.fillStyle=rg; c.fill(refl);
+    c.strokeStyle=pro42EdgeGrad(c,startX-gap*2,endX+gap*2,'#ffffff',.75); c.lineWidth=Math.max(1,1.4*sr);
+    c.beginPath(); c.moveTo(startX-gap*2,baselineY+1*sr); c.lineTo(endX+gap*2,baselineY+1*sr); c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='pixel_bars'){
+    const N=40, R=9, cell=Math.min(totalWidth/N,maxBarHeight*2.3/R), x0=centerX-N*cell/2, pad=Math.max(1,cell*0.1);
+    const PAL=['#29adff','#00e436','#ffec27','#ffa300','#ff004d','#ff77a8','#83769c','#29adff'];
+    const lit=new Float32Array(N);
+    for(let i=0;i<N;i++){ const v=Math.pow(proBand(raw,i/(N-1)),1.2); lit[i]=Math.min(R,Math.floor(waveSmoothHeight(i,v*R)+0.3)); }
+    const peaks=pro42Peaks('pix',lit,t,7*Number(Wv.motionDown??1));
+    const groups=PAL.map(()=>new Path2D()), hi=new Path2D(), caps=new Path2D();
+    for(let i=0;i<N;i++){
+      const x=x0+i*cell, gi=Math.floor(i/N*PAL.length);
+      for(let r=0;r<lit[i];r++){ const y=baselineY-(r+1)*cell; groups[gi].rect(x+pad,y+pad,cell-2*pad,cell-2*pad); hi.rect(x+pad,y+pad,(cell-2*pad)*0.35,(cell-2*pad)*0.35); }
+      const pr=Math.round(peaks[i]); if(pr>lit[i]||lit[i]===0){ const y=baselineY-(pr+1)*cell; caps.rect(x+pad,y+pad,cell-2*pad,cell-2*pad); }
+    }
+    c.save();
+    groups.forEach((g,k)=>{ c.fillStyle=PAL[k]; c.fill(g); });
+    c.fillStyle='rgba(255,255,255,.45)'; c.fill(hi);
+    c.fillStyle='#ffffff'; c.shadowColor='#ffffff'; c.shadowBlur=6*sr; c.fill(caps);
+    c.restore(); return true;
+  }
+
+  if(style==='vu_meter'){
+    const env=pro42Envelope(), S=pro42S(), sm=pro42Smooth();
+    const win=0.3+0.5*sm, hs=20*Math.log10(Math.max(0.1,Number(Wv.heightScale??1.4)/1.4));
+    const toPos=(rms)=>{ const vu=20*Math.log10(Math.max(1e-6,rms))+10+hs; const lin=Math.pow(10,vu/20); return pro42Clamp((lin-0.1)/(1.4125-0.1),-0.03,1.05); };
+    const tgt=[env?toPos(pro42Rms(env.L,t-win,t)):0, env?toPos(pro42Rms(env.R,t-win,t)):0];
+    if(!S.vu){ S.vu=[0,0]; S.vuT=-1; }
+    const dt=S.vuT<0?0:t-S.vuT, reset=S.vuT<0||dt<0||dt>0.6, kk=reset?1:(dt===0?0:1-Math.exp(-dt/0.09));
+    for(let k=0;k<2;k++) S.vu[k]+=(tgt[k]-S.vu[k])*kk; S.vuT=t;
+    const mw=Math.min(totalWidth*0.47,maxBarHeight*5.5), mh=mw*0.6, gap=mw*0.06;
+    const marks=[[-20,'20'],[-10,'10'],[-7,'7'],[-5,'5'],[-3,'3'],[-2,''],[-1,'1'],[0,'0'],[1,''],[2,'2'],[3,'3']];
+    const posOf=vu=>pro42Clamp((Math.pow(10,vu/20)-0.1)/(1.4125-0.1),0,1);
+    const A0=-Math.PI/2-0.85, A1=-Math.PI/2+0.85;
+    c.save();
+    for(let k=0;k<2;k++){
+      const mx=centerX+(k===0?-(mw+gap/2):gap/2), my=baselineY-mh;
+      c.beginPath(); pro42RR(c,mx-4*sr,my-4*sr,mw+8*sr,mh+8*sr,14*sr); c.fillStyle='#0d0d10'; c.shadowColor=C1; c.shadowBlur=14*sr; c.fill(); c.shadowBlur=0;
+      const fg=c.createLinearGradient(0,my,0,my+mh); fg.addColorStop(0,'#fff3d1'); fg.addColorStop(1,'#e8c26f');
+      c.beginPath(); pro42RR(c,mx,my,mw,mh,10*sr); c.fillStyle=fg; c.fill();
+      const px=mx+mw/2, py=my+mh*0.98, rr=mh*0.78;
+      const ang=p=>A0+(A1-A0)*p;
+      c.lineWidth=Math.max(1,2*sr); c.strokeStyle='#2b2118';
+      c.beginPath(); c.arc(px,py,rr,ang(0),ang(posOf(0))); c.stroke();
+      c.strokeStyle='#c0262d'; c.lineWidth=Math.max(2,5*sr); c.beginPath(); c.arc(px,py,rr+2*sr,ang(posOf(0)),ang(1)); c.stroke();
+      c.font=`700 ${Math.max(8,mh*0.075)}px Inter, sans-serif`; c.textAlign='center'; c.textBaseline='middle';
+      for(const [vu,lab] of marks){
+        const a=ang(posOf(vu)), long=lab!=='';
+        c.strokeStyle=vu>0?'#c0262d':'#2b2118'; c.lineWidth=Math.max(1,(long?2:1.2)*sr);
+        c.beginPath(); c.moveTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr); c.lineTo(px+Math.cos(a)*(rr+(long?mh*0.07:mh*0.04)),py+Math.sin(a)*(rr+(long?mh*0.07:mh*0.04))); c.stroke();
+        if(lab){ c.fillStyle=vu>0?'#c0262d':'#2b2118'; c.fillText((vu>0?'+':'')+lab,px+Math.cos(a)*(rr+mh*0.13),py+Math.sin(a)*(rr+mh*0.13)); }
+      }
+      c.font=`800 ${Math.max(10,mh*0.15)}px Inter, sans-serif`; c.fillStyle='#2b2118'; c.fillText('VU',px,py-rr*0.42);
+      c.font=`700 ${Math.max(8,mh*0.07)}px Inter, sans-serif`; c.fillText(k===0?'L':'R',mx+mw*0.1,my+mh*0.85);
+      const on=S.vu[k]>posOf(1);
+      c.beginPath(); c.arc(mx+mw*0.9,my+mh*0.18,Math.max(2,mh*0.035),0,Math.PI*2); c.fillStyle=on?'#ff2a2a':'#5a1a1a';
+      if(on){ c.shadowColor='#ff2a2a'; c.shadowBlur=12*sr; } c.fill(); c.shadowBlur=0;
+      const a=ang(pro42Clamp(S.vu[k],-0.03,1.05));
+      c.save(); c.shadowColor='rgba(0,0,0,.35)'; c.shadowBlur=4*sr; c.shadowOffsetX=3*sr; c.shadowOffsetY=3*sr;
+      c.strokeStyle='#151515'; c.lineWidth=Math.max(1.2,2.2*sr); c.beginPath(); c.moveTo(px,py); c.lineTo(px+Math.cos(a)*rr*1.08,py+Math.sin(a)*rr*1.08); c.stroke(); c.restore();
+      c.fillStyle='#151515'; c.beginPath(); c.arc(px,py,Math.max(3,mh*0.06),0,Math.PI*2); c.fill();
+      const gl=c.createLinearGradient(0,my,0,my+mh*0.5); gl.addColorStop(0,'rgba(255,255,255,.35)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+      c.beginPath(); pro42RR(c,mx,my,mw,mh*0.5,10*sr); c.fillStyle=gl; c.fill();
+    }
+    c.restore(); return true;
+  }
+
+  /* ---------------- 3D & KHÔNG GIAN ---------------- */
+  if(style==='synthwave'){
+    const hy=baselineY-maxBarHeight*1.9, fb=Math.min(h,baselineY+maxBarHeight*0.9), R=maxBarHeight*1.55*(1+bass*0.06);
+    c.save();
+    const halo=c.createRadialGradient(centerX,hy,R*0.6,centerX,hy,R*2.2); halo.addColorStop(0,'rgba(255,41,117,.35)'); halo.addColorStop(1,'rgba(255,41,117,0)');
+    c.fillStyle=halo; c.beginPath(); c.arc(centerX,hy,R*2.2,Math.PI,0); c.fill();
+    c.save(); c.beginPath();
+    for(let k=0;k<11;k++){ const y0=hy-R+k*R/11, gp=k<4?0:(k-3)*R*0.012; c.rect(centerX-R,y0,2*R,R/11-gp); }
+    c.clip();
+    const sg=c.createLinearGradient(0,hy-R,0,hy); sg.addColorStop(0,'#ffd319'); sg.addColorStop(.5,'#ff8c42'); sg.addColorStop(1,'#ff2975');
+    c.fillStyle=sg; c.beginPath(); c.arc(centerX,hy,R,Math.PI,0); c.fill(); c.restore();
+    const N=64, pts=[];
+    for(let i=0;i<N;i++){ const u=i/(N-1), d=Math.abs(u-.5)*2, v=Math.pow(proBand(raw,1-d),1.2), e=Math.pow(Math.sin(Math.PI*u),0.5);
+      pts.push([startX+u*totalWidth,hy-waveSmoothHeight(i,v*maxBarHeight*1.5*e)*(0.35+0.65*d)]); }
+    c.beginPath(); c.moveTo(startX,hy); for(const p of pts) c.lineTo(p[0],p[1]); c.lineTo(endX,hy); c.closePath();
+    c.fillStyle=pro42EdgeGrad(c,startX,endX,'#12001f',.92); c.fill();
+    c.beginPath(); c.moveTo(pts[0][0],pts[0][1]); for(const p of pts) c.lineTo(p[0],p[1]);
+    c.strokeStyle=pro42EdgeGrad(c,startX,endX,C2,1); c.lineWidth=Math.max(1.2,2.2*sr); c.shadowColor=C2; c.shadowBlur=12*sr; c.stroke(); c.shadowBlur=0;
+    c.fillStyle=pro42EdgeGrad(c,startX,endX,'#0a0016',.88); c.fillRect(startX,hy,totalWidth,fb-hy);
+    c.save(); c.beginPath(); c.rect(startX,hy,totalWidth,fb-hy); c.clip();
+    c.globalAlpha=0.55+0.45*Math.min(1,bass*1.4);
+    c.strokeStyle=pro42EdgeGrad(c,startX,endX,C1,.95); c.lineWidth=Math.max(1,1.5*sr); c.shadowColor=C1; c.shadowBlur=8*sr;
+    c.beginPath();
+    const K=12, ph=(t*0.8)%1;
+    for(let k=0;k<K;k++){ const z=(k+ph)/K, y=hy+(fb-hy)*Math.pow(z,2.2); c.moveTo(startX,y); c.lineTo(endX,y); }
+    const J=22, spT=totalWidth*0.05/J, spB=totalWidth*2.2/J;
+    for(let j=0;j<=J;j++){ const o=j-J/2; c.moveTo(centerX+o*spT,hy); c.lineTo(centerX+o*spB,fb+(fb-hy)); }
+    c.stroke(); c.restore();
+    c.strokeStyle=pro42EdgeGrad(c,startX,endX,'#ffffff',.9); c.lineWidth=Math.max(1,1.6*sr); c.shadowColor=C2; c.shadowBlur=14*sr;
+    c.beginPath(); c.moveTo(startX,hy); c.lineTo(endX,hy); c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='city_3d'){
+    const N=24, slot=totalWidth/N, dpt=slot*0.38, ddx=dpt*0.75, ddy=dpt*0.5;
+    const winP=new Path2D();
+    c.save();
+    for(let i=0;i<N;i++){
+      const rw=0.62+0.3*proRand(i,21), bw=slot*rw, x=startX+i*slot+(slot-bw)/2;
+      const v=Math.pow(proBand(raw,i/(N-1)),1.2);
+      const hh=waveSmoothHeight(i,maxBarHeight*(0.35+2.1*v)*(0.65+0.35*proRand(i,22)));
+      const y=baselineY-hh;
+      const fg=c.createLinearGradient(0,y,0,baselineY); fg.addColorStop(0,proMix(C1,'#000000',.35)); fg.addColorStop(1,proMix(C1,'#000000',.85));
+      c.fillStyle=proMix(C1,'#000000',.7);
+      c.beginPath(); c.moveTo(x+bw,y); c.lineTo(x+bw+ddx,y-ddy); c.lineTo(x+bw+ddx,baselineY-ddy); c.lineTo(x+bw,baselineY); c.closePath(); c.fill();
+      c.fillStyle=proMix(C2,'#ffffff',.15);
+      c.beginPath(); c.moveTo(x,y); c.lineTo(x+ddx,y-ddy); c.lineTo(x+bw+ddx,y-ddy); c.lineTo(x+bw,y); c.closePath(); c.fill();
+      c.fillStyle=fg; c.fillRect(x,y,bw,hh);
+      c.strokeStyle=proRGBA(C2,.9); c.lineWidth=Math.max(1,1.2*sr); c.beginPath(); c.moveTo(x,y); c.lineTo(x+bw,y); c.lineTo(x+bw+ddx,y-ddy); c.stroke();
+      const wc=3, ws=bw/(wc*2+1), rows=Math.floor((hh-ws*2)/(ws*2.2));
+      for(let r=0;r<rows;r++) for(let q=0;q<wc;q++){
+        if(proRand(i*97+r*7+q,3)<0.18+0.65*v){ winP.rect(x+ws*(1+q*2),y+ws*1.5+r*ws*2.2,ws,ws*1.2); }
+      }
+    }
+    c.fillStyle='rgba(255,233,168,.9)'; c.shadowColor='#ffd27a'; c.shadowBlur=6*sr; c.fill(winP); c.shadowBlur=0;
+    c.strokeStyle=pro42EdgeGrad(c,startX,endX+ddx,C1,.8); c.lineWidth=Math.max(1,1.5*sr);
+    c.beginPath(); c.moveTo(startX,baselineY); c.lineTo(endX+ddx,baselineY); c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='spectrogram'){
+    const S=pro42S(), M=160, L=96, H=maxBarHeight*2.4, step=Math.floor(t*24);
+    if(!S.spec){ S.spec=new Float32Array(M*L); S.specStep=null; S.specT=-1; S.cv=document.createElement('canvas'); S.cv.width=M; S.cv.height=L; S.cx=S.cv.getContext('2d'); S.img=S.cx.createImageData(M,L); S.edge=new Float32Array(M); for(let m=0;m<M;m++) S.edge[m]=Math.min(1,Math.sin(Math.PI*(m+0.5)/M)*2.2); }
+    const snap=S.snap||(S.snap=new Float32Array(M));
+    for(let m=0;m<M;m++) snap[m]=Math.min(1,Math.pow(proBand(raw,m/(M-1)),1.05)*1.15);
+    if(S.specStep===null||t<S.specT||step-S.specStep>48){ S.spec.fill(0); S.spec.set(snap,0); }
+    else if(step>S.specStep){ const n=Math.min(L,step-S.specStep); S.spec.copyWithin(n*M,0,(L-n)*M); for(let l=0;l<n;l++) S.spec.set(snap,l*M); }
+    else S.spec.set(snap,0);
+    S.specStep=step; S.specT=t;
+    const key=C1+C2;
+    if(S.lutKey!==key){
+      S.lutKey=key; S.lut=new Uint8ClampedArray(256*4);
+      const a=hexToRgb(C1), b=hexToRgb(C2);
+      for(let i=0;i<256;i++){
+        const v=i/255; let r,g,bb;
+        if(v<0.5){ const q=v/0.5; r=a[0]*q; g=a[1]*q; bb=a[2]*q; }
+        else if(v<0.93){ const q=(v-0.5)/0.43; r=a[0]+(b[0]-a[0])*q; g=a[1]+(b[1]-a[1])*q; bb=a[2]+(b[2]-a[2])*q; }
+        else { const q=(v-0.93)/0.07*0.6; r=b[0]+(255-b[0])*q; g=b[1]+(255-b[1])*q; bb=b[2]+(255-b[2])*q; }
+        S.lut[i*4]=r; S.lut[i*4+1]=g; S.lut[i*4+2]=bb; S.lut[i*4+3]=Math.min(255,Math.pow(v,0.7)*2.0*255);
+      }
+    }
+    const d=S.img.data, lut=S.lut;
+    for(let l=0;l<L;l++){
+      const fade=1-l/L, row=(L-1-l)*M, ff=fade*fade;
+      for(let m=0;m<M;m++){
+        const vi=Math.min(255,Math.round(S.spec[l*M+m]*255)), o=(row+m)*4, ef=S.edge[m];
+        d[o]=lut[vi*4]; d[o+1]=lut[vi*4+1]; d[o+2]=lut[vi*4+2]; d[o+3]=lut[vi*4+3]*ff*ef;
+      }
+    }
+    S.cx.putImageData(S.img,0,0);
+    c.save(); c.imageSmoothingEnabled=true;
+    c.drawImage(S.cv,startX,baselineY-H,totalWidth,H);
+    const pts=[]; for(let m=0;m<M;m+=3) pts.push([startX+m/(M-1)*totalWidth,baselineY-snap[m]*maxBarHeight*0.5]);
+    c.beginPath(); pro42Polyline(c,pts); c.strokeStyle=pro42EdgeGrad(c,startX,endX,'#ffffff',.9); c.lineWidth=Math.max(1,1.6*sr); c.shadowColor=C2; c.shadowBlur=10*sr; c.stroke();
+    c.restore(); return true;
+  }
+
+  /* ---------------- HÌNH KHỐI (giữa khung) ---------------- */
+  if(style==='polygon_spectrum'){
+    const G=proCircleGeom(w,h,t,Wv), SIDES=6, B=14, R=G.r*1.05, rot=G.rot*0.5-Math.PI/2;
+    const V=[]; for(let k=0;k<SIDES;k++){ const a=rot+k*Math.PI*2/SIDES; V.push([G.cx+Math.cos(a)*R,G.cy+Math.sin(a)*R]); }
+    const hexPath=(cc,rad,ro)=>{ for(let k=0;k<SIDES;k++){ const a=ro+k*Math.PI*2/SIDES, x=G.cx+Math.cos(a)*rad, y=G.cy+Math.sin(a)*rad; if(k)cc.lineTo(x,y); else cc.moveTo(x,y);} cc.closePath(); };
+    const pr=R+G.amp*1.5*(0.6+bass*0.7);
+    c.save();
+    c.beginPath(); hexPath(c,pr,-rot*0.6); c.strokeStyle=proRGBA(C2,.35); c.lineWidth=Math.max(1,1.6*sr); c.stroke();
+    c.beginPath();
+    for(let k=0;k<SIDES;k++){
+      const p=V[k], q=V[(k+1)%SIDES], ex=q[0]-p[0], ey=q[1]-p[1], el=Math.hypot(ex,ey), nx=ey/el, ny=-ex/el;
+      const mx=(p[0]+q[0])/2-G.cx, my=(p[1]+q[1])/2-G.cy, sgn=(nx*mx+ny*my)>0?1:-1;
+      for(let j=0;j<B;j++){
+        const f=(j+0.5)/B, s=(k*B+j+0.5)/(SIDES*B), v=Math.pow(proBand(raw,Math.abs(s-.5)*2),1.3);
+        const len=waveSmoothHeight(k*B+j,Math.max(2*sr,v*G.amp*1.3));
+        const x=p[0]+ex*f, y=p[1]+ey*f;
+        c.moveTo(x,y); c.lineTo(x+nx*sgn*len,y+ny*sgn*len);
+      }
+    }
+    c.lineWidth=Math.max(1.5,R/B*0.55); c.strokeStyle=proRingGradient(c,G,C1,C2); c.shadowColor=C2; c.shadowBlur=10*sr; c.stroke(); c.shadowBlur=0;
+    pro42ClipCenterImage(c,cc=>hexPath(cc,R*0.94,rot),G,t,Wv,bass,sr,C1);
+    c.beginPath(); hexPath(c,R*0.97,rot); c.strokeStyle=C1; c.lineWidth=Math.max(1.5,3*sr); c.shadowColor=C1; c.shadowBlur=14*sr; c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='heart_spectrum'){
+    const G=proCircleGeom(w,h,t,Wv), N=110, beat=1+0.07*Math.pow(bass,1.5), sc=G.r/16*beat;
+    const hp=(th)=>{ const s=Math.sin(th); return [16*s*s*s, -(13*Math.cos(th)-5*Math.cos(2*th)-2*Math.cos(3*th)-Math.cos(4*th))-2.5]; };
+    const pts=[]; for(let i=0;i<N;i++){ const p=hp(i/N*Math.PI*2); pts.push([G.cx+p[0]*sc,G.cy+p[1]*sc]); }
+    const heartPath=(cc,k)=>{ const kk=k||1; cc.moveTo(G.cx+(pts[0][0]-G.cx)*kk,G.cy+(pts[0][1]-G.cy)*kk); for(let i=1;i<N;i++) cc.lineTo(G.cx+(pts[i][0]-G.cx)*kk,G.cy+(pts[i][1]-G.cy)*kk); cc.closePath(); };
+    c.save();
+    c.beginPath();
+    for(let i=0;i<N;i++){
+      const p=pts[i]; let nx=p[0]-G.cx, ny=p[1]-G.cy; const nl=Math.hypot(nx,ny)||1; nx/=nl; ny/=nl;
+      const th=i/N*Math.PI*2, d=th<=Math.PI?th/Math.PI:(2*Math.PI-th)/Math.PI;
+      const cusp=Math.min(1,Math.max(0,(d-0.06)/0.14)), tip=Math.min(1,Math.max(0,(0.95-d)/0.2));
+      const v=Math.pow(proBand(raw,Math.abs(d-0.45)*1.8),1.3)*cusp*tip, len=waveSmoothHeight(i,Math.max(2*sr*cusp*tip,v*G.amp*1.2));
+      c.moveTo(p[0]+nx*3*sr,p[1]+ny*3*sr); c.lineTo(p[0]+nx*(3*sr+len),p[1]+ny*(3*sr+len));
+    }
+    c.lineWidth=Math.max(1.5,G.r*0.045); c.strokeStyle=proRingGradient(c,G,C2,C1); c.shadowColor=C2; c.shadowBlur=10*sr; c.stroke(); c.shadowBlur=0;
+    pro42ClipCenterImage(c,cc=>heartPath(cc,0.96),G,t,Wv,bass,sr,C2);
+    c.beginPath(); heartPath(c,1); c.strokeStyle=C2; c.lineWidth=Math.max(1.5,3*sr); c.shadowColor=C2; c.shadowBlur=16*sr; c.stroke();
+    c.restore(); return true;
+  }
+
+  if(style==='kaleido_tunnel'){
+    const G=proCircleGeom(w,h,t,Wv), K=14, N=72, phase=t*0.55, fr=phase-Math.floor(phase), base=Math.floor(phase);
+    const hs=Number(Wv.heightScale??1.4)/1.4, maxR=G.r*3.0;
+    const sym=new Float32Array(N); for(let i=0;i<N;i++){ const u=(i/N*6)%1; sym[i]=Math.pow(proBand(raw,Math.abs(u-.5)*2),1.3); }
+    const sm=proSmoothRing(sym,1);
+    for(let i=0;i<N;i++) sm[i]=waveSmoothHeight(i,sm[i]);
+    c.save(); c.globalCompositeOperation='lighter';
+    for(let i=0;i<K;i++){
+      const p=(i+fr)/K, s=Math.pow(p,2.2), id=i-base, R=maxR*s;
+      if(R<2) continue;
+      const alpha=Math.min(1,p*4)*Math.min(1,(1-p)*6+0.15), rot=G.rot+id*0.26, pts=[];
+      for(let j=0;j<N;j++){ const a=rot+j/N*Math.PI*2, rr=R*(1+0.38*sm[j]*hs*(0.4+0.6*p)); pts.push([G.cx+Math.cos(a)*rr,G.cy+Math.sin(a)*rr]); }
+      c.beginPath(); proClosedCurve(c,pts);
+      const col=((id%2)+2)%2?C2:C1;
+      const lw=Math.max(1,(0.6+3.2*s)*sr*1.6);
+      if(i>=K-5){ c.strokeStyle=proRGBA(col,alpha*0.22); c.lineWidth=lw*3.5; c.stroke(); }
+      c.strokeStyle=proRGBA(col,alpha*0.9); c.lineWidth=lw; c.stroke();
+    }
+    c.restore();
+    const G2=Object.assign({},G,{r:G.r*0.55}); proDrawCenter(c,G2,t,bass,Wv,sr);
+    return true;
+  }
+  return false;
+}
+
 let waveRenderRawData = new Uint8Array(256);
 let directRenderOverlayEl = null;
 function getDirectRenderWaveFlag(){
@@ -5961,6 +6456,7 @@ function drawAveeWaveSingle(c, w, h, t){
   const baselineY = h * (Wv.y / 100);
   const sensitivity = Wv.heightScale || 1.4;
   const maxBarHeight = (isVertical ? 80 : 65) * (h / 1080) * sensitivity;
+  if(LUMI_STYLE_REMAP[Wv.style]) Wv.style = LUMI_STYLE_REMAP[Wv.style];
   const waveStyle = Wv.style || 'dense_bars';
   beginWaveSmoothFrame(t, waveStyle);
 
@@ -7973,7 +8469,7 @@ function builtinPresets(){
   const wc=(typeof weatherCinematicPresets!=='undefined')?weatherCinematicPresets:{};
   return [
     {id:'b-ballad',name:'Ballad buồn',builtin:true,data:{
-      wave:{style:'ballad_silk_columns',color:'#f9d5e5',color2:'#b8c0ff',heightScale:1.2,columnSpeed:.85,peakSpeed:.045,fallSpeed:.045},
+      wave:{style:'aurora_ribbons',motionSmooth:70,color:'#f9d5e5',color2:'#b8c0ff',heightScale:1.2,columnSpeed:.85,peakSpeed:.045,fallSpeed:.045},
       beatMotion:{enabled:true,intensity:.22,zoom:.018,shake:.6,rotation:.06,flashEnabled:false,fullFlash:false},
       weather:Object.assign({},wc.dreamy||{},{enabled:true}), batch:{effect:'fadeblack',transitionDur:1.2},
       lyrics:{appearFx:'blurin',exitFx:'blurout',karaokeColor:'#ffd1dc'}, fade:{enabled:true,inSec:3,outSec:4,color:'#000000',audio:true}}},
@@ -7992,8 +8488,20 @@ function builtinPresets(){
       beatMotion:{enabled:true,intensity:.18,zoom:.015,shake:.4,rotation:.05,flashEnabled:false,fullFlash:false},
       weather:Object.assign({},wc.dreamy||{},{enabled:true}), batch:{effect:'fadeblack',transitionDur:1.2},
       fade:{enabled:true,inSec:3,outSec:4,color:'#000000',audio:true}}},
+    {id:'b-synth',name:'Synthwave retro 80s',builtin:true,data:{
+      wave:{style:'synthwave',x:50,y:90,widthScale:100,heightScale:1.5,color:'#22d3ee',color2:'#ff2a6d',motionSmooth:50,motionUp:1.2,motionDown:0.9,motionGate:12},
+      beatMotion:{enabled:true,intensity:.35,zoom:.025,shake:.8,rotation:.08,flashEnabled:false,fullFlash:false},
+      batch:{effect:'zoompunch',transitionDur:.6}, fade:{enabled:true,inSec:2,outSec:3,color:'#000000',audio:true}}},
+    {id:'b-vu',name:'Nhạc xưa / Bolero — đồng hồ VU',builtin:true,data:{
+      wave:{style:'vu_meter',x:50,y:94,widthScale:70,heightScale:1.4,color:'#f59e0b',color2:'#fde68a',motionSmooth:70},
+      beatMotion:{enabled:true,intensity:.12,zoom:.01,shake:.2,rotation:.03,flashEnabled:false,fullFlash:false},
+      batch:{effect:'fadeblack',transitionDur:1.4}, fade:{enabled:true,inSec:3,outSec:4,color:'#000000',audio:true}}},
+    {id:'b-podcast',name:'Acoustic / Podcast — audiogram',builtin:true,data:{
+      wave:{style:'audiogram_scroll',x:50,y:88,widthScale:80,heightScale:1.3,color:'#ffffff',color2:'#a78bfa',motionSmooth:40},
+      beatMotion:{enabled:false},
+      fade:{enabled:true,inSec:1.5,outSec:2.5,color:'#000000',audio:true}}},
     {id:'b-lofi',name:'Lofi chill',builtin:true,data:{
-      wave:{style:'ballad_soft_bars',color:'#fde68a',color2:'#a7f3d0',heightScale:1.1,columnSpeed:.8,peakSpeed:.04},
+      wave:{style:'reflect_bars',motionSmooth:65,color:'#fde68a',color2:'#a7f3d0',heightScale:1.1,columnSpeed:.8,peakSpeed:.04},
       beatMotion:{enabled:true,intensity:.15,zoom:.012,shake:.3,rotation:.04,flashEnabled:false,fullFlash:false},
       weather:Object.assign({},wc.golden||{},{enabled:true}), batch:{effect:'lightleaks',transitionDur:1.0},
       lyrics:{appearFx:'fade',exitFx:'fade',karaokeColor:'#fde68a'}, fade:{enabled:true,inSec:2.5,outSec:3.5,color:'#000000',audio:true}}}
@@ -8018,7 +8526,7 @@ function applyStyle(data,groups){
 }
 function presetSummary(d){
   const parts=[];
-  if(d.wave&&d.wave.style){ const st=(typeof AVEE_WAVE_STYLES!=='undefined'?AVEE_WAVE_STYLES:[]).find(x=>x.id===d.wave.style); parts.push(st?st.name.replace(/^\S+\s+/,''):d.wave.style); }
+  if(d.wave&&d.wave.style){ const st=(typeof AVEE_WAVE_STYLES!=='undefined'?AVEE_WAVE_STYLES:[]).find(x=>x.id===lumiNormWaveStyle(d.wave.style)); parts.push(st?st.name.replace(/^\S+\s+/,''):d.wave.style); }
   if(d.aspect) parts.push(d.aspect==='916'?'9:16':'16:9');
   if(d.weather&&d.weather.enabled) parts.push('thời tiết');
   if(d.vinyl&&d.vinyl.enabled) parts.push('đĩa than');
