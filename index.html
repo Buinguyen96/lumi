@@ -2716,6 +2716,10 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 .ts-row button{flex:1;}
 .l44-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
 .l44-quick .btn-sm{padding:7px 4px;font-size:11.5px;}
+#l47Restore{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:450;display:flex;align-items:center;justify-content:center;padding:16px;}
+#l47Restore .l47-box{width:min(440px,100%);background:#15110e;border:1px solid #4a3020;border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+#l47Restore h3{margin:0 0 8px;color:#ffd09b;}
+#l47Restore p{margin:0 0 14px;color:#cfc4ba;font-size:14px;line-height:1.45;}
 .motion-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
 .motion-quick button{padding:8px 4px;}
 .motion-quick button.active{border-color:#ff9a3c;color:#ffb067;background:#2a1a10;}
@@ -2734,7 +2738,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.6</span></div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.7</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3902,7 +3906,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.6 (21/11) • nhận MP3, M4A, AAC, WAV</span></p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.7 (21/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -8069,6 +8073,112 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('pageshow',()=>{ if(audioCtx&&audioCtx.state!=='running'&&!directRendering) audioCtx.resume().catch(()=>{}); });
 
+
+/* =========================================================================
+   LUMI 4.7 — RENDER KHÔNG TRÀN BỘ NHỚ + TỰ LƯU DỰ ÁN TRƯỚC KHI RENDER
+   Bản cũ giữ cả video trong RAM rồi mới ghép (cần 3–5 lần dung lượng video)
+   → iPhone đóng trang ở cuối render. Giờ video được gom thành từng khối nhỏ
+   ngay trong lúc render; trước mỗi lần render, dự án được lưu tạm vào máy.
+========================================================================= */
+const L47={db:null};
+function l47Open(){
+  return new Promise((res,rej)=>{ try{ const r=indexedDB.open('lumiSession',1);
+    r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('s'); }catch(_){} };
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }catch(e){ rej(e); } });
+}
+async function l47Tx(mode,fn){
+  const db=await l47Open();
+  try{ return await new Promise((res,rej)=>{ const tx=db.transaction('s',mode), st=tx.objectStore('s'); let out; const rq=fn(st); if(rq) rq.onsuccess=()=>{ out=rq.result; };
+    tx.oncomplete=()=>res(out); tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error); }); }
+  finally{ db.close(); }
+}
+const l47Put=(k,v)=>l47Tx('readwrite',st=>st.put(v,k));
+const l47Get=k=>l47Tx('readonly',st=>st.get(k));
+const l47Del=k=>l47Tx('readwrite',st=>st.delete(k));
+async function l47SaveSession(){
+  if(!window.indexedDB) return false;
+  if(!state.audio.buffer&&!state.images.length) return false;
+  const blob=await saveProject({returnBlob:true});
+  if(!blob) return false;
+  await l47Put('last',{blob,time:Date.now(),name:state.audio.fileName||''});
+  await l47Put('flag',{inRender:true,time:Date.now()});
+  return true;
+}
+function l47EndRender(){ if(!window.indexedDB) return; l47Put('flag',{inRender:false,time:Date.now()}).catch(()=>{}); }
+
+/* ---- đầu ra MP4 gom từng khối nhỏ (không giữ cả video trong RAM) ---- */
+function l47OnData(out,data,pos){
+  const d=data.slice(), len=d.byteLength;
+  if(pos===out.size){ out.parts.push(d); out.size+=len; out.pend+=len; }
+  else if(pos<out.size){
+    const inside=Math.min(len,out.size-pos); out.patches.push({pos,data:d.subarray(0,inside)});
+    if(inside<len){ const rest=d.subarray(inside); out.parts.push(rest); out.size+=rest.byteLength; out.pend+=rest.byteLength; }
+  } else { const gap=new Uint8Array(pos-out.size); out.parts.push(gap,d); out.size=pos+len; out.pend+=gap.byteLength+len; }
+  if(out.pend>=8*1024*1024){ out.pieces.push(new Blob(out.parts)); out.parts=[]; out.pend=0; }
+}
+function l47Assemble(out){
+  if(out.parts.length){ out.pieces.push(new Blob(out.parts)); out.parts=[]; out.pend=0; }
+  let blob=new Blob(out.pieces,{type:'video/mp4'}); out.pieces=[];
+  for(const p of out.patches) blob=new Blob([blob.slice(0,p.pos),p.data,blob.slice(p.pos+p.data.byteLength)],{type:'video/mp4'});
+  out.patches=[]; return blob;
+}
+const __cmo47=createMuxerOutput;
+createMuxerOutput=async function(M,saveHandle,w,h,sampleRate,channels,acodec='aac'){
+  try{ renderUI(0,'Đang lưu tạm dự án (phòng khi trang bị đóng)…',''); }catch(_){}
+  try{ await l47SaveSession(); }catch(e){ console.warn('Không lưu tạm được dự án:',e); }
+  if((saveHandle&&saveHandle!=='__CANCEL__'&&streamToDiskEnabled())||!M.StreamTarget) return __cmo47(M,saveHandle,w,h,sampleRate,channels,acodec);
+  const {Muxer,StreamTarget}=M;
+  const out={streamed:false,blobMode:true,saveHandle,error:null,parts:[],pieces:[],patches:[],size:0,pend:0};
+  const target=new StreamTarget({chunked:true,chunkSize:4*1024*1024,onData:(data,pos)=>{ if(out.error) return; try{ l47OnData(out,data,pos); }catch(e){ out.error=e; } }});
+  out.muxer=new Muxer({target,video:{codec:'avc',width:w,height:h},audio:{codec:acodec,sampleRate,numberOfChannels:channels},fastStart:false});
+  out.target=target;
+  return out;
+};
+const __fmo47=finishMuxerOutput;
+finishMuxerOutput=async function(out,fileName){
+  if(!out||!out.blobMode) return __fmo47(out,fileName);
+  out.muxer.finalize();
+  if(out.error) throw out.error;
+  const blob=l47Assemble(out);
+  if(out.saveHandle&&out.saveHandle!=='__CANCEL__'){
+    try{ const wr=await out.saveHandle.createWritable(); await wr.write(blob); await wr.close(); return true; }
+    catch(e){ console.error('Lưu MP4 qua hộp chọn file lỗi, tải về kiểu cũ:',e); }
+  }
+  deliverBlob(blob,fileName,'Video MP4 đã sẵn sàng');
+  return false;
+};
+const __checkOut47=checkMuxerOutput;
+checkMuxerOutput=function(out){ if(out&&out.blobMode&&out.error) throw out.error; return __checkOut47(out); };
+const __sdr47=startDirectRender;
+startDirectRender=async function(){ try{ return await __sdr47.apply(this,arguments); } finally { l47EndRender(); } };
+const __short47=exportShortCutMp4;
+exportShortCutMp4=async function(){ try{ return await __short47.apply(this,arguments); } finally { l47EndRender(); } };
+
+/* ---- mở lại trang sau khi bị đóng giữa lúc render → hỏi khôi phục ---- */
+async function l47OfferRestore(force){
+  if(!window.indexedDB) return;
+  let flag, last;
+  try{ flag=await l47Get('flag'); last=await l47Get('last'); }catch(_){ return; }
+  if(!last||!last.blob) { if(force) lumiToast('Chưa có bản lưu tạm nào'); return; }
+  if(!force&&!(flag&&flag.inRender)) return;
+  if(!force&&(state.audio.buffer||state.images.length)) return;
+  const d=new Date(last.time), when=d.toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+  let ov=document.getElementById('l47Restore'); if(ov) ov.remove();
+  ov=el(`<div id="l47Restore"><div class="l47-box">
+    <h3>Khôi phục dự án?</h3>
+    <p>${force?'Bản lưu tạm gần nhất':'Lần trước trang bị đóng giữa lúc render (thường do iPhone hết bộ nhớ). Tool đã lưu tạm dự án ngay trước khi render'} — lúc ${when}${last.name?` • ${escapeHtml(last.name)}`:''}.</p>
+    <button class="btn-primary-sm" id="l47Yes" style="width:100%;">Khôi phục dự án</button>
+    <button class="btn-sm" id="l47No" style="width:100%;margin-top:8px;">Bỏ qua</button></div></div>`);
+  document.body.appendChild(ov);
+  ov.querySelector('#l47Yes').addEventListener('click',async()=>{
+    ov.remove(); lumiToast('Đang khôi phục dự án…',2500);
+    try{ await loadProject(new File([last.blob],'phien-truoc.lumivis')); }catch(e){ alert('Không khôi phục được: '+(e&&e.message||e)); }
+    l47Put('flag',{inRender:false,time:Date.now()}).catch(()=>{});
+  });
+  ov.querySelector('#l47No').addEventListener('click',()=>{ ov.remove(); l47Put('flag',{inRender:false,time:Date.now()}).catch(()=>{}); });
+}
+window.addEventListener('load',()=>setTimeout(()=>l47OfferRestore(false),1200));
+
 let waveRenderRawData = new Uint8Array(256);
 let directRenderOverlayEl = null;
 function getDirectRenderWaveFlag(){
@@ -9842,14 +9952,17 @@ document.getElementById('projectFileInput').addEventListener('change', e=>{
   }
 });
 
-async function saveProject() {
+async function saveProject(opts) {
+  opts = (opts && opts.returnBlob) ? opts : {};
   if (state.images.length === 0 && !state.audio.buffer) {
+    if (opts.returnBlob) return null;
     alert('Dự án trống! Vui lòng thêm ít nhất 1 ảnh hoặc nhạc trước khi lưu.');
     return;
   }
 
   const btn = document.getElementById('btnSaveProject');
-  btn.innerHTML = '<span>Đang lưu...</span>';
+  btn.dataset.l47 = btn.innerHTML;
+  if (!opts.returnBlob) btn.innerHTML = '<span>Đang lưu...</span>';
 
   try {
     const zip = new JSZip();
@@ -9924,10 +10037,13 @@ async function saveProject() {
     zip.file("project.json", JSON.stringify(projectConfig, null, 2));
 
     const content = await zip.generateAsync({ type: "blob" });
-    deliverBlob(content, `LumiVisualizerPro_${Date.now()}.lumivis`, 'File dự án đã sẵn sàng');
+    if (opts.returnBlob) { btn.innerHTML = btn.dataset.l47 || btn.innerHTML; }
+    else deliverBlob(content, `LumiVisualizerPro_${Date.now()}.lumivis`, 'File dự án đã sẵn sàng');
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg> <span class="lbl-long">Lưu dự án</span><span class="lbl-short">Lưu</span>`;
+    if (opts.returnBlob) return content;
 
   } catch (err) {
+    if (opts.returnBlob) throw err;
     alert('Lỗi khi lưu dự án: ' + err.message);
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg> <span class="lbl-long">Lưu dự án</span><span class="lbl-short">Lưu</span>`;
   }
