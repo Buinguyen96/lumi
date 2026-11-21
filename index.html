@@ -2734,7 +2734,7 @@ html,body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
 <div id="app">
 
   <header>
-    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.5</span></div>
+    <div class="logo"><span class="dot"></span>LUMI VISUALIZER PRO <span style="font-size:10px;color:#ffc17c;font-weight:600;letter-spacing:.3px;">4.6</span></div>
     
     <button class="btn-proj" id="btnSaveProject" title="Lưu dự án thành file nén .lumivis">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3902,7 +3902,7 @@ function panelShortCut(){
 function panelMusic(){
   const wrap = el(`<div>
     <h3>Nhạc nền</h3>
-    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.5 (20/11) • nhận MP3, M4A, AAC, WAV</span></p>
+    <p class="hint">Tải nhạc lên, hệ thống sẽ tự phân tích nhịp (BPM) và tính mốc chia đoạn ảnh.<br><span style="color:#ffc17c;font-weight:700;">Phiên bản: Pro 4.6 (21/11) • nhận MP3, M4A, AAC, WAV</span></p>
     <div class="dropzone" id="audioDrop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       <div>${state.audio.file ? (state.audio.file.name || state.audio.fileName) : 'Chọn hoặc kéo thả file MP3 / WAV'}</div>
@@ -7990,6 +7990,85 @@ l43Snap=function(){ const o=JSON.parse(__snap45()); o.vfx=state.vfx; return JSON
 const __restore45=l43Restore;
 l43Restore=function(s){ try{ const d=JSON.parse(s); if(d.vfx) Object.assign(state.vfx,d.vfx); }catch(_){} return __restore45(s); };
 
+
+/* =========================================================================
+   LUMI 4.6 — SỬA MẤT TIẾNG SAU KHI CHUYỂN APP (iPhone)
+   iPhone đưa bộ xử lý âm thanh của trang sang trạng thái "interrupted" khi rời app.
+   Bản cũ chỉ đánh thức khi "suspended" → nhạc vẫn chạy nhưng không có tiếng.
+========================================================================= */
+const L46={listeners:[],bad:0,needReset:false,pausedByHide:false,timer:0,td:null};
+(function(){ const ae=document.getElementById('audioEl'); if(!ae) return;
+  const orig=ae.addEventListener.bind(ae);
+  ae.addEventListener=function(ev,fn,o){ L46.listeners.push([ev,fn,o]); return orig(ev,fn,o); };
+})();
+async function l46Wake(){
+  if(!audioCtx) return true;
+  if(audioCtx.state!=='running'){ try{ await audioCtx.resume(); }catch(_){} }
+  if(audioCtx.state!=='running'){ await new Promise(r=>setTimeout(r,200)); try{ await audioCtx.resume(); }catch(_){} }
+  return audioCtx.state==='running';
+}
+/* Dựng lại đường âm thanh với thẻ audio mới (khi iPhone làm "kẹt" đường cũ) */
+async function l46HardReset(){
+  const old=document.getElementById('audioEl'); if(!old) return;
+  const t=old.currentTime||0, src=old.currentSrc||old.src;
+  const neo=document.createElement('audio'); neo.id='audioEl'; neo.crossOrigin='anonymous'; neo.style.display='none'; neo.preload='auto'; neo.setAttribute('playsinline','');
+  try{ old.pause(); }catch(_){}
+  old.parentNode.replaceChild(neo,old);
+  const orig=neo.addEventListener.bind(neo);
+  L46.listeners.forEach(([ev,fn,o])=>orig(ev,fn,o));
+  neo.addEventListener=function(ev,fn,o){ L46.listeners.push([ev,fn,o]); return orig(ev,fn,o); };
+  try{ if(audioCtx) await audioCtx.close(); }catch(_){}
+  audioCtx=null; sourceNode=null; analyser=null; gainNode=null;
+  neo.src=src;
+  await new Promise(r=>{ if(neo.readyState>=1) r(); else { orig('loadedmetadata',r,{once:true}); setTimeout(r,2500); } });
+  try{ neo.currentTime=t; }catch(_){}
+  setupAudioGraph();
+  try{ await audioCtx.resume(); }catch(_){}
+}
+const __toggle46=togglePlay;
+togglePlay=async function(){
+  if(directRendering) return __toggle46();
+  if(!state.playing&&state.audio.buffer){
+    setupAudioGraph();
+    let ok=!L46.needReset&&await l46Wake();
+    if(!ok){ L46.needReset=false; await l46HardReset(); }
+    L46.pausedByHide=false; L46.bad=0;
+  }
+  const r=await __toggle46();
+  l46Watch();
+  return r;
+};
+function l46Watch(){
+  clearInterval(L46.timer);
+  if(!state.playing||directRendering) return;
+  L46.timer=setInterval(()=>{
+    if(!state.playing||directRendering){ clearInterval(L46.timer); return; }
+    const ae=document.getElementById('audioEl'); if(!ae||ae.paused) return;
+    if(audioCtx&&audioCtx.state!=='running'){ audioCtx.resume().catch(()=>{}); L46.bad++; }
+    else if(analyser){
+      if(!L46.td||L46.td.length!==analyser.fftSize) L46.td=new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(L46.td); let mx=0; for(let i=0;i<L46.td.length;i+=4){ const v=Math.abs(L46.td[i]-128); if(v>mx) mx=v; }
+      const env=(typeof pro42Envelope==='function')?pro42Envelope():null, t=ae.currentTime;
+      const loud=env?(pro42Rms(env.L,t-.5,t)+pro42Rms(env.R,t-.5,t))*.5>.012:true;
+      if(mx<=1&&loud) L46.bad++; else L46.bad=0;
+    }
+    if(L46.bad>=3){
+      L46.bad=0; L46.needReset=true; __toggle46();
+      lumiToast('iPhone vừa ngắt âm thanh — bấm ▶ Phát để nghe tiếp (tool sẽ tự khôi phục tiếng)',4500);
+    }
+  },700);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(directRendering) return;
+  if(document.hidden){
+    if(state.playing){ L46.pausedByHide=true; __toggle46(); }
+  } else {
+    if(audioCtx&&audioCtx.state!=='running') audioCtx.resume().catch(()=>{});
+    if(L46.pausedByHide){ L46.pausedByHide=false; lumiToast('Đã tạm dừng khi bạn rời app — bấm ▶ Phát để nghe tiếp',3500); }
+  }
+});
+window.addEventListener('pageshow',()=>{ if(audioCtx&&audioCtx.state!=='running'&&!directRendering) audioCtx.resume().catch(()=>{}); });
+
 let waveRenderRawData = new Uint8Array(256);
 let directRenderOverlayEl = null;
 function getDirectRenderWaveFlag(){
@@ -9508,7 +9587,7 @@ async function togglePlay(){
   const audioEl=document.getElementById('audioEl');
   if(!state.audio.buffer){ return; }
   setupAudioGraph();
-  if(audioCtx && audioCtx.state==='suspended') await audioCtx.resume();
+  if(audioCtx && audioCtx.state!=='running'){ try{ await audioCtx.resume(); }catch(_){} }
   
   if(state.playing){
     audioEl.pause();
